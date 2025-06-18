@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvoicePro - Static HTML Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .hidden { display: none !important; }
+        .active-nav { background-color: rgb(219 234 254); color: rgb(29 78 216); }
+        .invoice-table { border-collapse: collapse; width: 100%; }
+        .invoice-table th, .invoice-table td { border: 1px solid #d1d5db; padding: 12px; }
+        .invoice-table th { background-color: #f3f4f6; }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+        <div class="flex h-16 items-center justify-center border-b">
+            <h1 class="text-xl font-bold text-blue-600">InvoicePro</h1>
+        </div>
+        
+        <nav class="mt-6 px-3">
+            <a href="#" onclick="showPage('dashboard')" class="nav-item group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900" data-page="dashboard">
+                <i data-lucide="bar-chart-3" class="mr-3 h-5 w-5"></i>
+                Dashboard
+            </a>
+            <a href="#" onclick="showPage('invoices')" class="nav-item group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900" data-page="invoices">
+                <i data-lucide="file-text" class="mr-3 h-5 w-5"></i>
+                Invoices
+            </a>
+            <a href="#" onclick="showPage('clients')" class="nav-item group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900" data-page="clients">
+                <i data-lucide="users" class="mr-3 h-5 w-5"></i>
+                Clients
+            </a>
+            <a href="#" onclick="showPage('payments')" class="nav-item group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900" data-page="payments">
+                <i data-lucide="credit-card" class="mr-3 h-5 w-5"></i>
+                Payments
+            </a>
+            <a href="#" onclick="showPage('company')" class="nav-item group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900" data-page="company">
+                <i data-lucide="building-2" class="mr-3 h-5 w-5"></i>
+                Company
+            </a>
+            <a href="#" onclick="showPage('integrations')" class="nav-item group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900" data-page="integrations">
+                <i data-lucide="link" class="mr-3 h-5 w-5"></i>
+                Integrations
+            </a>
+            <a href="#" onclick="showPage('settings')" class="nav-item group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors active-nav text-gray-700 hover:bg-gray-100 hover:text-gray-900" data-page="settings">
+                <i data-lucide="settings" class="mr-3 h-5 w-5"></i>
+                Settings
+            </a>
+        </nav>
+
+        <div class="absolute bottom-4 left-3 right-3">
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                <i data-lucide="plus" class="mr-2 h-4 w-4 inline"></i>
+                New Invoice
+            </button>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="pl-64">
+        <main class="p-6">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page-content space-y-6">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-3xl font-bold">Dashboard</h1>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">Create New Invoice</button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-lg border p-6">
+                        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 class="text-sm font-medium">Total Revenue</h3>
+                            <i data-lucide="dollar-sign" class="h-4 w-4 text-gray-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold">$12,450.00</div>
+                        <p class="text-xs text-gray-500">From paid invoices</p>
+                    </div>
+
+                    <div class="bg-white rounded-lg border p-6">
+                        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 class="text-sm font-medium">Pending Amount</h3>
+                            <i data-lucide="clock" class="h-4 w-4 text-gray-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold">$3,200.00</div>
+                        <p class="text-xs text-gray-500">Awaiting payment</p>
+                    </div>
+
+                    <div class="bg-white rounded-lg border p-6">
+                        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 class="text-sm font-medium">Total Invoices</h3>
+                            <i data-lucide="file-text" class="h-4 w-4 text-gray-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold">24</div>
+                        <p class="text-xs text-gray-500">All time</p>
+                    </div>
+
+                    <div class="bg-white rounded-lg border p-6">
+                        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 class="text-sm font-medium">Total Clients</h3>
+                            <i data-lucide="users" class="h-4 w-4 text-gray-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold">8</div>
+                        <p class="text-xs text-gray-500">Active clients</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-page" class="page-content space-y-6 hidden">
+                <div class="max-w-2xl mx-auto space-y-6">
+                    <div class="flex items-center space-x-3">
+                        <i data-lucide="settings" class="h-8 w-8 text-blue-600"></i>
+                        <h1 class="text-3xl font-bold">Settings</h1>
+                    </div>
+
+                    <!-- General Settings -->
+                    <div class="bg-white rounded-lg border">
+                        <div class="p-6 border-b">
+                            <h2 class="text-xl font-semibold">General Settings</h2>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Default Currency</label>
+                                    <select class="w-full p-2 border rounded-md">
+                                        <option>USD ($)</option>
+                                        <option>EUR (€)</option>
+                                        <option>GBP (£)</option>
+                                        <option>CAD (C$)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Date Format</label>
+                                    <select class="w-full p-2 border rounded-md">
+                                        <option>MM/DD/YYYY</option>
+                                        <option>DD/MM/YYYY</option>
+                                        <option>YYYY-MM-DD</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Default Tax Rate (%)</label>
+                                    <input type="number" value="10" class="w-full p-2 border rounded-md">
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="font-medium">Auto-generate Invoice Numbers</label>
+                                        <p class="text-sm text-gray-500">Automatically generate sequential invoice numbers</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="font-medium">Email Notifications</label>
+                                        <p class="text-sm text-gray-500">Receive notifications about invoice activities</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">Save Settings</button>
+                        </div>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="bg-white rounded-lg border">
+                        <div class="p-6 border-b">
+                            <h2 class="text-xl font-semibold">Data Management</h2>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="space-y-2">
+                                <h4 class="font-medium">Backup & Restore</h4>
+                                <div class="flex space-x-2">
+                                    <button class="border border-gray-300 hover:bg-gray-50 font-medium py-2 px-4 rounded transition-colors">
+                                        <i data-lucide="download" class="h-4 w-4 mr-2 inline"></i>
+                                        Export Data
+                                    </button>
+                                    <button class="border border-gray-300 hover:bg-gray-50 font-medium py-2 px-4 rounded transition-colors">
+                                        <i data-lucide="upload" class="h-4 w-4 mr-2 inline"></i>
+                                        Import Data
+                                    </button>
+                                </div>
+                                <p class="text-sm text-gray-500">
+                                    Export your data for backup or import from a previous backup
+                                </p>
+                            </div>
+
+                            <div class="border-t pt-4">
+                                <h4 class="font-medium text-red-600 mb-2">Danger Zone</h4>
+                                <button class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                                    <i data-lucide="trash-2" class="h-4 w-4 mr-2 inline"></i>
+                                    Clear All Data
+                                </button>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    This will permanently delete all invoices, clients, and settings
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Preview Sample -->
+            <div id="invoice-preview-page" class="page-content space-y-6 hidden">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="flex items-center justify-between">
+                        <button class="border border-gray-300 hover:bg-gray-50 font-medium py-2 px-4 rounded transition-colors">
+                            <i data-lucide="arrow-left" class="h-4 w-4 mr-2 inline"></i>
+                            Back to Invoices
+                        </button>
+                        <div class="space-x-2">
+                            <button class="border border-gray-300 hover:bg-gray-50 font-medium py-2 px-4 rounded transition-colors">
+                                <i data-lucide="edit" class="h-4 w-4 mr-2 inline"></i>
+                                Edit
+                            </button>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                                <i data-lucide="download" class="h-4 w-4 mr-2 inline"></i>
+                                Download PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border">
+                        <div class="p-8">
+                            <div class="bg-white">
+                                <!-- Header -->
+                                <div class="flex justify-between items-start mb-8">
+                                    <div>
+                                        <h1 class="text-3xl font-bold text-blue-600">Your Company Name</h1>
+                                        <div class="text-sm text-gray-600 mt-2">
+                                            <p>123 Business Street</p>
+                                            <p>City, State 12345</p>
+                                            <p>United States</p>
+                                            <p class="mt-2">
+                                                Phone: (555) 123-4567<br>
+                                                Email: info@company.com<br>
+                                                Website: www.company.com
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <h2 class="text-2xl font-bold mb-2">INVOICE</h2>
+                                        <p class="text-lg font-semibold">INV-2024-0001</p>
+                                        <div class="text-sm text-gray-600 mt-4">
+                                            <p><strong>Issue Date:</strong> 12/18/2024</p>
+                                            <p><strong>Due Date:</strong> 01/17/2025</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bill To -->
+                                <div class="mb-8">
+                                    <h3 class="text-lg font-semibold mb-2">Bill To:</h3>
+                                    <div class="text-sm">
+                                        <p class="font-semibold">Sample Client</p>
+                                        <p>456 Client Avenue</p>
+                                        <p>Client City, State 67890</p>
+                                        <p>United States</p>
+                                        <p class="mt-2">
+                                            Email: client@example.com<br>
+                                            Phone: (555) 987-6543
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Items Table -->
+                                <div class="mb-8">
+                                    <table class="invoice-table w-full">
+                                        <thead>
+                                            <tr class="bg-gray-100">
+                                                <th class="text-left">Description</th>
+                                                <th class="text-right">Qty</th>
+                                                <th class="text-right">Rate</th>
+                                                <th class="text-right">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Web Development Services</td>
+                                                <td class="text-right">1</td>
+                                                <td class="text-right">$2,500.00</td>
+                                                <td class="text-right">$2,500.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Design Consultation</td>
+                                                <td class="text-right">5</td>
+                                                <td class="text-right">$150.00</td>
+                                                <td class="text-right">$750.00</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Totals -->
+                                <div class="flex justify-end mb-8">
+                                    <div class="w-64">
+                                        <div class="flex justify-between py-2">
+                                            <span>Subtotal:</span>
+                                            <span>$3,250.00</span>
+                                        </div>
+                                        <div class="flex justify-between py-2">
+                                            <span>Tax (10%):</span>
+                                            <span>$325.00</span>
+                                        </div>
+                                        <div class="border-t-2 border-gray-300 flex justify-between py-2 font-bold text-lg">
+                                            <span>Total:</span>
+                                            <span>$3,575.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="text-center text-sm text-gray-500 border-t pt-4">
+                                    <p>Thank you for your business!</p>
+                                    <p>This invoice was generated electronically and is valid without signature.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other pages (simplified) -->
+            <div id="invoices-page" class="page-content space-y-6 hidden">
+                <h1 class="text-3xl font-bold">Invoices</h1>
+                <div class="bg-white rounded-lg border p-6">
+                    <p>Invoice list would be displayed here...</p>
+                </div>
+            </div>
+
+            <div id="clients-page" class="page-content space-y-6 hidden">
+                <h1 class="text-3xl font-bold">Clients</h1>
+                <div class="bg-white rounded-lg border p-6">
+                    <p>Client management would be displayed here...</p>
+                </div>
+            </div>
+
+            <div id="payments-page" class="page-content space-y-6 hidden">
+                <h1 class="text-3xl font-bold">Payment Tracking</h1>
+                <div class="bg-white rounded-lg border p-6">
+                    <p>Payment tracking would be displayed here...</p>
+                </div>
+            </div>
+
+            <div id="company-page" class="page-content space-y-6 hidden">
+                <h1 class="text-3xl font-bold">Company Settings</h1>
+                <div class="bg-white rounded-lg border p-6">
+                    <p>Company settings would be displayed here...</p>
+                </div>
+            </div>
+
+            <div id="integrations-page" class="page-content space-y-6 hidden">
+                <h1 class="text-3xl font-bold">Integrations</h1>
+                <div class="bg-white rounded-lg border p-6">
+                    <p>Integrations would be displayed here...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Simple page navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active-nav');
+            });
+            
+            // Show selected page
+            const targetPage = document.getElementById(pageId + '-page');
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+            
+            // Add active class to selected nav item
+            const activeNavItem = document.querySelector(`[data-page="${pageId}"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.add('active-nav');
+            }
+        }
+
+        // Show settings page by default (matching current route)
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('settings');
+        });
+    </script>
+</body>
+</html>
