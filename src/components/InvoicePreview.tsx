@@ -138,9 +138,9 @@ const InvoicePreview = () => {
                   {invoice.items.map((item) => (
                     <tr key={item.id}>
                       <td className="border border-gray-300 px-4 py-2">{item.description}</td>
-                      <td className="border border-gray-300 px-4 py-2 text-right">{item.quantity}</td>
-                      <td className="border border-gray-300 px-4 py-2 text-right">${item.rate.toFixed(2)}</td>
-                      <td className="border border-gray-300 px-4 py-2 text-right">${item.amount.toFixed(2)}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-right">{Number(item.quantity)}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-right">${Number(item.rate).toFixed(2)}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-right">${Number(item.amount).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -152,15 +152,15 @@ const InvoicePreview = () => {
               <div className="w-64">
                 <div className="flex justify-between py-2">
                   <span>Subtotal:</span>
-                  <span>${invoice.subtotal.toFixed(2)}</span>
+                  <span>${Number(invoice.subtotal).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between py-2">
-                  <span>Tax ({invoice.taxRate}%):</span>
-                  <span>${invoice.tax.toFixed(2)}</span>
+                  <span>Tax ({Number(invoice.taxRate)}%):</span>
+                  <span>${Number(invoice.tax).toFixed(2)}</span>
                 </div>
                 <div className="border-t-2 border-gray-300 flex justify-between py-2 font-bold text-lg">
                   <span>Total:</span>
-                  <span>${invoice.total.toFixed(2)}</span>
+                  <span>${Number(invoice.total).toFixed(2)}</span>
                 </div>
               </div>
             </div>
