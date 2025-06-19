@@ -7,14 +7,18 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInvoice } from '@/contexts/InvoiceContext';
 import { Link } from 'react-router-dom';
-import { Eye, Edit, Trash2, Download, Plus, Search } from 'lucide-react';
+import { Eye, Edit, Trash2, Download, Plus, Search, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const InvoiceList = () => {
   const { invoices, deleteInvoice, updateInvoice } = useInvoice();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [priceDialogOpen, setPriceDialogOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [sellingPrice, setSellingPrice] = useState('');
 
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch = 
@@ -53,6 +57,23 @@ const InvoiceList = () => {
       title: "Success",
       description: `Invoice status updated to ${newStatus}`,
     });
+  };
+
+  const updateSellingPrice = () => {
+    if (!selectedInvoice || !sellingPrice) return;
+    
+    const updatedInvoice = { 
+      ...selectedInvoice, 
+      total: parseFloat(sellingPrice),
+      updatedAt: new Date().toISOString() 
+    };
+    updateInvoice(updatedInvoice);
+    toast({
+      title: "Success",
+      description: "Selling price updated successfully",
+    });
+    setPriceDialogOpen(false);
+    setSellingPrice('');
   };
 
   return (
@@ -122,60 +143,106 @@ const InvoiceList = () => {
                     <th className="text-left py-3 px-2">Client</th>
                     <th className="text-left py-3 px-2">Issue Date</th>
                     <th className="text-left py-3 px-2">Due Date</th>
-                    <th className="text-left py-3 px-2">Amount</th>
+                    <th className="text-left py-3 px-2">Selling Price</th>
+                    <th className="text-left py-3 px-2">Buying Price</th>
+                    <th className="text-left py-3 px-2">Profit</th>
                     <th className="text-left py-3 px-2">Status</th>
                     <th className="text-left py-3 px-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInvoices.map((invoice) => (
-                    <tr key={invoice.id} className="border-b hover:bg-gray-50">
-                      <td className="py-4 px-2 font-medium">{invoice.invoiceNumber}</td>
-                      <td className="py-4 px-2">{invoice.client.name}</td>
-                      <td className="py-4 px-2">{new Date(invoice.issueDate).toLocaleDateString()}</td>
-                      <td className="py-4 px-2">{new Date(invoice.dueDate).toLocaleDateString()}</td>
-                      <td className="py-4 px-2 font-medium">${invoice.total.toFixed(2)}</td>
-                      <td className="py-4 px-2">
-                        <Select
-                          value={invoice.status}
-                          onValueChange={(value) => handleStatusChange(invoice, value)}
-                        >
-                          <SelectTrigger className="w-32">
-                            <Badge className={getStatusColor(invoice.status)}>
-                              {invoice.status}
-                            </Badge>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="draft">Draft</SelectItem>
-                            <SelectItem value="sent">Sent</SelectItem>
-                            <SelectItem value="paid">Paid</SelectItem>
-                            <SelectItem value="overdue">Overdue</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="py-4 px-2">
-                        <div className="flex space-x-2">
-                          <Link to={`/invoices/${invoice.id}/preview`}>
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          <Link to={`/invoices/${invoice.id}`}>
-                            <Button size="sm" variant="outline">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDelete(invoice.id)}
+                  {filteredInvoices.map((invoice) => {
+                    const buyingPrice = invoice.total * 0.7; // Demo: 70% of selling price
+                    const profit = invoice.total - buyingPrice;
+                    
+                    return (
+                      <tr key={invoice.id} className="border-b hover:bg-gray-50">
+                        <td className="py-4 px-2 font-medium">{invoice.invoiceNumber}</td>
+                        <td className="py-4 px-2">{invoice.client.name}</td>
+                        <td className="py-4 px-2">{new Date(invoice.issueDate).toLocaleDateString()}</td>
+                        <td className="py-4 px-2">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+                        <td className="py-4 px-2 font-medium">
+                          <div className="flex items-center space-x-2">
+                            <span>${invoice.total.toFixed(2)}</span>
+                            <Dialog open={priceDialogOpen} onOpenChange={setPriceDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setSelectedInvoice(invoice);
+                                    setSellingPrice(invoice.total.toString());
+                                  }}
+                                >
+                                  <DollarSign className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Update Selling Price</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-sm font-medium mb-2">Selling Price</label>
+                                    <Input
+                                      type="number"
+                                      value={sellingPrice}
+                                      onChange={(e) => setSellingPrice(e.target.value)}
+                                      placeholder="Enter selling price"
+                                    />
+                                  </div>
+                                  <Button onClick={updateSellingPrice} className="w-full">
+                                    Update Price
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2 text-orange-600">${buyingPrice.toFixed(2)}</td>
+                        <td className="py-4 px-2 font-medium text-green-600">${profit.toFixed(2)}</td>
+                        <td className="py-4 px-2">
+                          <Select
+                            value={invoice.status}
+                            onValueChange={(value) => handleStatusChange(invoice, value)}
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            <SelectTrigger className="w-32">
+                              <Badge className={getStatusColor(invoice.status)}>
+                                {invoice.status}
+                              </Badge>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="draft">Draft</SelectItem>
+                              <SelectItem value="sent">Sent</SelectItem>
+                              <SelectItem value="paid">Paid</SelectItem>
+                              <SelectItem value="overdue">Overdue</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="py-4 px-2">
+                          <div className="flex space-x-2">
+                            <Link to={`/invoices/${invoice.id}/preview`}>
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            <Link to={`/invoices/${invoice.id}`}>
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete(invoice.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

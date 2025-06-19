@@ -6,14 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInvoice } from '@/contexts/InvoiceContext';
-import { CreditCard, Search, DollarSign, TrendingUp, Clock, CheckCircle } from 'lucide-react';
+import { CreditCard, Search, DollarSign, TrendingUp, Clock, CheckCircle, Mail, Send, PiggyBank } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 const PaymentTracking = () => {
   const { invoices, updateInvoice } = useInvoice();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [emailSubject, setEmailSubject] = useState('Payment Reminder');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [bankAccount, setBankAccount] = useState('');
 
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch = 
@@ -48,11 +56,37 @@ const PaymentTracking = () => {
     });
   };
 
-  // Calculate statistics
+  const sendEmailReminder = () => {
+    if (!selectedInvoice) return;
+    
+    // In a real app, this would send an actual email
+    toast({
+      title: "Email Sent",
+      description: `Payment reminder sent to ${selectedInvoice.client.email}`,
+    });
+    setEmailDialogOpen(false);
+    setEmailMessage('');
+  };
+
+  const sendPaymentPrompt = () => {
+    if (!selectedInvoice) return;
+    
+    // In a real app, this would integrate with payment systems
+    toast({
+      title: "Payment Prompt Sent",
+      description: `Payment prompt sent to ${selectedInvoice.client.name}`,
+    });
+    setPaymentDialogOpen(false);
+  };
+
+  // Calculate statistics with profit tracking
   const totalAmount = invoices.reduce((sum, inv) => sum + inv.total, 0);
   const paidAmount = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total, 0);
   const pendingAmount = invoices.filter(inv => inv.status !== 'paid').reduce((sum, inv) => sum + inv.total, 0);
   const overdueInvoices = invoices.filter(inv => inv.status === 'overdue').length;
+  
+  // Sample profit calculation (assuming 30% profit margin for demo)
+  const estimatedProfit = paidAmount * 0.3;
 
   return (
     <div className="space-y-6">
@@ -62,7 +96,7 @@ const PaymentTracking = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
@@ -110,7 +144,45 @@ const PaymentTracking = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2">
+              <PiggyBank className="h-8 w-8 text-purple-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Estimated Profit</p>
+                <p className="text-2xl font-bold">${estimatedProfit.toFixed(2)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Bank Account Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Bank Account Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Bank Account Number</label>
+              <Input
+                placeholder="Enter your bank account number"
+                value={bankAccount}
+                onChange={(e) => setBankAccount(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">External System URL</label>
+              <Input
+                placeholder="https://your-buying-price-system.com/api"
+                type="url"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <Card>
@@ -161,7 +233,9 @@ const PaymentTracking = () => {
                     <th className="text-left py-3 px-2">Invoice #</th>
                     <th className="text-left py-3 px-2">Client</th>
                     <th className="text-left py-3 px-2">Due Date</th>
-                    <th className="text-left py-3 px-2">Amount</th>
+                    <th className="text-left py-3 px-2">Selling Price</th>
+                    <th className="text-left py-3 px-2">Buying Price</th>
+                    <th className="text-left py-3 px-2">Profit</th>
                     <th className="text-left py-3 px-2">Status</th>
                     <th className="text-left py-3 px-2">Days Overdue</th>
                     <th className="text-left py-3 px-2">Actions</th>
@@ -172,6 +246,8 @@ const PaymentTracking = () => {
                     const dueDate = new Date(invoice.dueDate);
                     const today = new Date();
                     const daysOverdue = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+                    const buyingPrice = invoice.total * 0.7; // Demo: 70% of selling price
+                    const profit = invoice.total - buyingPrice;
                     
                     return (
                       <tr key={invoice.id} className="border-b hover:bg-gray-50">
@@ -179,6 +255,8 @@ const PaymentTracking = () => {
                         <td className="py-4 px-2">{invoice.client.name}</td>
                         <td className="py-4 px-2">{dueDate.toLocaleDateString()}</td>
                         <td className="py-4 px-2 font-medium">${invoice.total.toFixed(2)}</td>
+                        <td className="py-4 px-2 text-orange-600">${buyingPrice.toFixed(2)}</td>
+                        <td className="py-4 px-2 font-medium text-green-600">${profit.toFixed(2)}</td>
                         <td className="py-4 px-2">
                           <Badge className={getStatusColor(invoice.status)}>
                             {invoice.status}
@@ -192,14 +270,80 @@ const PaymentTracking = () => {
                           )}
                         </td>
                         <td className="py-4 px-2">
-                          {invoice.status !== 'paid' && (
-                            <Button
-                              size="sm"
-                              onClick={() => markAsPaid(invoice)}
-                            >
-                              Mark as Paid
-                            </Button>
-                          )}
+                          <div className="flex space-x-2">
+                            {invoice.status !== 'paid' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => markAsPaid(invoice)}
+                                >
+                                  Mark as Paid
+                                </Button>
+                                <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setSelectedInvoice(invoice)}
+                                    >
+                                      <Mail className="h-4 w-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Send Payment Reminder</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                      <div>
+                                        <label className="block text-sm font-medium mb-2">Subject</label>
+                                        <Input
+                                          value={emailSubject}
+                                          onChange={(e) => setEmailSubject(e.target.value)}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-sm font-medium mb-2">Message</label>
+                                        <Textarea
+                                          placeholder="Dear client, this is a reminder..."
+                                          value={emailMessage}
+                                          onChange={(e) => setEmailMessage(e.target.value)}
+                                          rows={4}
+                                        />
+                                      </div>
+                                      <Button onClick={sendEmailReminder} className="w-full">
+                                        Send Reminder
+                                      </Button>
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
+                                <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setSelectedInvoice(invoice)}
+                                    >
+                                      <Send className="h-4 w-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Send Payment Prompt</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                      <p>Send a payment prompt to {selectedInvoice?.client.name} for invoice {selectedInvoice?.invoiceNumber}?</p>
+                                      <p className="text-sm text-muted-foreground">
+                                        This will send a payment link directly to the client's phone/email.
+                                      </p>
+                                      <Button onClick={sendPaymentPrompt} className="w-full">
+                                        Send Payment Prompt
+                                      </Button>
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
