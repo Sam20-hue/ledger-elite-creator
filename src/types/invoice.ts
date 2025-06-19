@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   name: string;
@@ -8,6 +7,8 @@ export interface Client {
   city: string;
   zipCode: string;
   country: string;
+  company?: string;
+  taxId?: string;
 }
 
 export interface InvoiceItem {
