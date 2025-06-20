@@ -6,7 +6,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/sam20-hue.github.io/' : '/',
+  base: mode === 'production' ? '/ledger-elite-creator/' : '/',
   server: {
     host: "::",
     port: 8080,

@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { InvoiceProvider } from "@/contexts/InvoiceContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import Layout from "@/components/Layout";
@@ -28,7 +28,7 @@ const App = () => (
       <Toaster />
       <AuthProvider>
         <InvoiceProvider>
-          <BrowserRouter>
+          <HashRouter>
             <Layout>
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -47,7 +47,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
-          </BrowserRouter>
+          </HashRouter>
         </InvoiceProvider>
       </AuthProvider>
     </TooltipProvider>
