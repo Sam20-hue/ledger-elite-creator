@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Plus, Trash2, UserCheck, Settings } from 'lucide-react';
 
@@ -16,6 +17,7 @@ interface User {
   password: string;
   createdAt: string;
   permissions: string[];
+  role: 'admin' | 'sub-admin' | 'user';
 }
 
 const availablePages = [
@@ -25,7 +27,8 @@ const availablePages = [
   { id: 'payments', name: 'Payments' },
   { id: 'company', name: 'Company Settings' },
   { id: 'integrations', name: 'Integrations' },
-  { id: 'settings', name: 'Settings' }
+  { id: 'settings', name: 'Settings' },
+  { id: 'admin', name: 'Admin Panel' }
 ];
 
 const Admin = () => {
@@ -37,7 +40,8 @@ const Admin = () => {
     name: '',
     email: '',
     password: '',
-    permissions: [] as string[]
+    permissions: [] as string[],
+    role: 'user' as 'admin' | 'sub-admin' | 'user'
   });
   const { toast } = useToast();
 
@@ -84,7 +88,7 @@ const Admin = () => {
       description: "User registered successfully",
     });
 
-    setFormData({ name: '', email: '', password: '', permissions: [] });
+    setFormData({ name: '', email: '', password: '', permissions: [], role: 'user' });
     setIsDialogOpen(false);
   };
 
@@ -103,9 +107,10 @@ const Admin = () => {
 
   const handlePermissionChange = (pageId: string, checked: boolean) => {
     if (selectedUser) {
+      const currentPermissions = selectedUser.permissions || [];
       const updatedPermissions = checked 
-        ? [...selectedUser.permissions, pageId]
-        : selectedUser.permissions.filter(p => p !== pageId);
+        ? [...currentPermissions, pageId]
+        : currentPermissions.filter(p => p !== pageId);
       
       setSelectedUser({ ...selectedUser, permissions: updatedPermissions });
     } else {
@@ -135,6 +140,13 @@ const Admin = () => {
     }
   };
 
+  const getFilteredPages = (role: string) => {
+    if (role === 'user') {
+      return availablePages.filter(page => page.id !== 'admin');
+    }
+    return availablePages;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -152,6 +164,9 @@ const Admin = () => {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Register New User</DialogTitle>
+              <DialogDescription>
+                Create a new user account with specific permissions and role.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -187,9 +202,22 @@ const Admin = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="role">User Role</Label>
+                <Select value={formData.role} onValueChange={(value: 'admin' | 'sub-admin' | 'user') => setFormData(prev => ({ ...prev, role: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">Regular User</SelectItem>
+                    <SelectItem value="sub-admin">Sub Admin</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label>Page Permissions</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
-                  {availablePages.map((page) => (
+                  {getFilteredPages(formData.role).map((page) => (
                     <div key={page.id} className="flex items-center space-x-2">
                       <Checkbox
                         id={page.id}
@@ -235,6 +263,7 @@ const Admin = () => {
                   <tr className="border-b">
                     <th className="text-left py-3 px-2">Name</th>
                     <th className="text-left py-3 px-2">Email</th>
+                    <th className="text-left py-3 px-2">Role</th>
                     <th className="text-left py-3 px-2">Permissions</th>
                     <th className="text-left py-3 px-2">Created</th>
                     <th className="text-left py-3 px-2">Actions</th>
@@ -245,6 +274,15 @@ const Admin = () => {
                     <tr key={user.id} className="border-b hover:bg-gray-50">
                       <td className="py-4 px-2 font-medium">{user.name}</td>
                       <td className="py-4 px-2">{user.email}</td>
+                      <td className="py-4 px-2">
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                          user.role === 'sub-admin' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {user.role}
+                        </span>
+                      </td>
                       <td className="py-4 px-2">
                         <span className="text-sm text-gray-600">
                           {user.permissions?.length || 0} pages
@@ -288,12 +326,33 @@ const Admin = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Manage Permissions for {selectedUser?.name}</DialogTitle>
+            <DialogDescription>
+              Configure page access permissions and user role.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
+              <Label>User Role</Label>
+              <Select 
+                value={selectedUser?.role || 'user'} 
+                onValueChange={(value: 'admin' | 'sub-admin' | 'user') => 
+                  selectedUser && setSelectedUser({...selectedUser, role: value})
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Regular User</SelectItem>
+                  <SelectItem value="sub-admin">Sub Admin</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label>Page Access Permissions</Label>
               <div className="grid grid-cols-2 gap-3 mt-3">
-                {availablePages.map((page) => (
+                {getFilteredPages(selectedUser?.role || 'user').map((page) => (
                   <div key={page.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`permission-${page.id}`}

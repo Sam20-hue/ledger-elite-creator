@@ -18,7 +18,7 @@ import CompanySettings from "@/components/CompanySettings";
 import PaymentTracking from "@/components/PaymentTracking";
 import IntegrationsPage from "@/components/IntegrationsPage";
 import EnhancedSettings from "@/components/EnhancedSettings";
-import NotFound from "./pages/NotFound";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 

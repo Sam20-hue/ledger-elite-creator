@@ -40,14 +40,21 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       return [...allNavigation, { name: 'Admin', href: '/admin', icon: UserCheck, id: 'admin' }];
     }
     
-    if (userRole === 'user') {
+    if (userRole === 'sub-admin' || userRole === 'user') {
       const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
       const currentUserData = registeredUsers.find((u: any) => u.email === currentUser);
       
       if (currentUserData?.permissions) {
-        return allNavigation.filter(nav => 
+        const baseNavigation = allNavigation.filter(nav => 
           nav.id === 'home' || currentUserData.permissions.includes(nav.id)
         );
+        
+        // Add admin access if user has admin permission
+        if (currentUserData.permissions.includes('admin')) {
+          baseNavigation.push({ name: 'Admin', href: '/admin', icon: UserCheck, id: 'admin' });
+        }
+        
+        return baseNavigation;
       }
     }
     
@@ -116,6 +123,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </nav>
 
         <div className="absolute bottom-4 left-3 right-3 space-y-2">
+          <div className="text-sm text-gray-600 px-3 mb-2">
+            Logged in as: {currentUser}
+            <br />
+            Role: {userRole}
+          </div>
           <Link to="/invoices/new">
             <Button className="w-full">
               <Plus className="mr-2 h-4 w-4" />

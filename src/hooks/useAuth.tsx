@@ -1,5 +1,5 @@
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -17,6 +17,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<string | null>(null);
 
   useEffect(() => {
+    // Create default admin user if not exists
+    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const adminExists = registeredUsers.find((u: any) => u.email === 'amayamusamson@gmail.com');
+    
+    if (!adminExists) {
+      const adminUser = {
+        id: 'admin-1',
+        name: 'Admin User',
+        email: 'amayamusamson@gmail.com',
+        password: '1029384756',
+        createdAt: new Date().toISOString(),
+        permissions: ['dashboard', 'invoices', 'clients', 'payments', 'company', 'integrations', 'settings', 'admin'],
+        role: 'admin'
+      };
+      registeredUsers.push(adminUser);
+      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+    }
+
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const role = localStorage.getItem('userRole');
     const user = localStorage.getItem('currentUser');
@@ -28,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (email: string, password: string): boolean => {
     // Check for admin login
-    if (password === '1029384756') {
+    if (email === 'amayamusamson@gmail.com' && password === '1029384756') {
       localStorage.setItem('userRole', 'admin');
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('currentUser', email);
@@ -43,11 +61,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const user = registeredUsers.find((u: any) => u.email === email && u.password === password);
 
     if (user) {
-      localStorage.setItem('userRole', 'user');
+      const role = user.role || 'user';
+      localStorage.setItem('userRole', role);
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('currentUser', email);
       setIsLoggedIn(true);
-      setUserRole('user');
+      setUserRole(role);
       setCurrentUser(email);
       return true;
     }
