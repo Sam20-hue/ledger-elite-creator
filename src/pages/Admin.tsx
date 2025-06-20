@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Plus, Trash2, UserCheck } from 'lucide-react';
+import { Users, Plus, Trash2, UserCheck, Settings } from 'lucide-react';
 
 interface User {
   id: string;
@@ -14,15 +15,29 @@ interface User {
   email: string;
   password: string;
   createdAt: string;
+  permissions: string[];
 }
+
+const availablePages = [
+  { id: 'dashboard', name: 'Dashboard' },
+  { id: 'invoices', name: 'Invoices' },
+  { id: 'clients', name: 'Clients' },
+  { id: 'payments', name: 'Payments' },
+  { id: 'company', name: 'Company Settings' },
+  { id: 'integrations', name: 'Integrations' },
+  { id: 'settings', name: 'Settings' }
+];
 
 const Admin = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    permissions: [] as string[]
   });
   const { toast } = useToast();
 
@@ -69,7 +84,7 @@ const Admin = () => {
       description: "User registered successfully",
     });
 
-    setFormData({ name: '', email: '', password: '' });
+    setFormData({ name: '', email: '', password: '', permissions: [] });
     setIsDialogOpen(false);
   };
 
@@ -83,6 +98,40 @@ const Admin = () => {
         title: "Success",
         description: "User deleted successfully",
       });
+    }
+  };
+
+  const handlePermissionChange = (pageId: string, checked: boolean) => {
+    if (selectedUser) {
+      const updatedPermissions = checked 
+        ? [...selectedUser.permissions, pageId]
+        : selectedUser.permissions.filter(p => p !== pageId);
+      
+      setSelectedUser({ ...selectedUser, permissions: updatedPermissions });
+    } else {
+      const updatedPermissions = checked 
+        ? [...formData.permissions, pageId]
+        : formData.permissions.filter(p => p !== pageId);
+      
+      setFormData({ ...formData, permissions: updatedPermissions });
+    }
+  };
+
+  const savePermissions = () => {
+    if (selectedUser) {
+      const updatedUsers = users.map(user => 
+        user.id === selectedUser.id ? selectedUser : user
+      );
+      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      setUsers(updatedUsers);
+      
+      toast({
+        title: "Success",
+        description: "Permissions updated successfully",
+      });
+      
+      setIsPermissionDialogOpen(false);
+      setSelectedUser(null);
     }
   };
 
@@ -100,7 +149,7 @@ const Admin = () => {
               Register New User
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Register New User</DialogTitle>
             </DialogHeader>
@@ -137,6 +186,21 @@ const Admin = () => {
                   required
                 />
               </div>
+              <div>
+                <Label>Page Permissions</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {availablePages.map((page) => (
+                    <div key={page.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={page.id}
+                        checked={formData.permissions.includes(page.id)}
+                        onCheckedChange={(checked) => handlePermissionChange(page.id, checked as boolean)}
+                      />
+                      <Label htmlFor={page.id} className="text-sm">{page.name}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
@@ -153,7 +217,7 @@ const Admin = () => {
       <Card>
         <CardHeader>
           <CardTitle>Registered Users ({users.length})</CardTitle>
-          <CardDescription>Manage all registered users in the system</CardDescription>
+          <CardDescription>Manage all registered users and their permissions</CardDescription>
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
@@ -171,6 +235,7 @@ const Admin = () => {
                   <tr className="border-b">
                     <th className="text-left py-3 px-2">Name</th>
                     <th className="text-left py-3 px-2">Email</th>
+                    <th className="text-left py-3 px-2">Permissions</th>
                     <th className="text-left py-3 px-2">Created</th>
                     <th className="text-left py-3 px-2">Actions</th>
                   </tr>
@@ -181,17 +246,34 @@ const Admin = () => {
                       <td className="py-4 px-2 font-medium">{user.name}</td>
                       <td className="py-4 px-2">{user.email}</td>
                       <td className="py-4 px-2">
+                        <span className="text-sm text-gray-600">
+                          {user.permissions?.length || 0} pages
+                        </span>
+                      </td>
+                      <td className="py-4 px-2">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(user.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setIsPermissionDialogOpen(true);
+                            }}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDelete(user.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -201,6 +283,39 @@ const Admin = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isPermissionDialogOpen} onOpenChange={setIsPermissionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage Permissions for {selectedUser?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Page Access Permissions</Label>
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                {availablePages.map((page) => (
+                  <div key={page.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`permission-${page.id}`}
+                      checked={selectedUser?.permissions?.includes(page.id) || false}
+                      onCheckedChange={(checked) => handlePermissionChange(page.id, checked as boolean)}
+                    />
+                    <Label htmlFor={`permission-${page.id}`}>{page.name}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsPermissionDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={savePermissions}>
+                Save Permissions
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

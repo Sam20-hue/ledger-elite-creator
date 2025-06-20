@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -14,38 +15,20 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Check for admin login
-    if (password === '1029384756') {
-      localStorage.setItem('userRole', 'admin');
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('currentUser', email);
+    const success = login(email, password);
+
+    if (success) {
       toast({
         title: "Success",
-        description: "Welcome back, Admin!",
+        description: "Welcome to Numera!",
       });
-      navigate('/');
-      setIsLoading(false);
-      return;
-    }
-
-    // Check for regular user login
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    const user = registeredUsers.find((u: any) => u.email === email && u.password === password);
-
-    if (user) {
-      localStorage.setItem('userRole', 'user');
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('currentUser', email);
-      toast({
-        title: "Success",
-        description: `Welcome back, ${user.name}!`,
-      });
-      navigate('/');
+      navigate('/dashboard');
     } else {
       toast({
         title: "Error",

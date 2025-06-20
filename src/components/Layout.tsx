@@ -20,23 +20,39 @@ import { useAuth } from '@/hooks/useAuth';
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isLoggedIn, userRole, logout } = useAuth();
+  const { isLoggedIn, userRole, currentUser, logout } = useAuth();
 
-  const navigation = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
-    { name: 'Invoices', href: '/invoices', icon: FileText },
-    { name: 'Clients', href: '/clients', icon: Users },
-    { name: 'Payments', href: '/payments', icon: CreditCard },
-    { name: 'Company', href: '/company', icon: Building2 },
-    { name: 'Integrations', href: '/integrations', icon: LinkIcon },
-    { name: 'Settings', href: '/settings', icon: Settings },
+  const getAllNavigation = () => [
+    { name: 'Home', href: '/', icon: Home, id: 'home' },
+    { name: 'Dashboard', href: '/dashboard', icon: BarChart3, id: 'dashboard' },
+    { name: 'Invoices', href: '/invoices', icon: FileText, id: 'invoices' },
+    { name: 'Clients', href: '/clients', icon: Users, id: 'clients' },
+    { name: 'Payments', href: '/payments', icon: CreditCard, id: 'payments' },
+    { name: 'Company', href: '/company', icon: Building2, id: 'company' },
+    { name: 'Integrations', href: '/integrations', icon: LinkIcon, id: 'integrations' },
+    { name: 'Settings', href: '/settings', icon: Settings, id: 'settings' },
   ];
 
-  // Add admin page only for admin users
-  if (userRole === 'admin') {
-    navigation.push({ name: 'Admin', href: '/admin', icon: UserCheck });
-  }
+  const getFilteredNavigation = () => {
+    const allNavigation = getAllNavigation();
+    
+    if (userRole === 'admin') {
+      return [...allNavigation, { name: 'Admin', href: '/admin', icon: UserCheck, id: 'admin' }];
+    }
+    
+    if (userRole === 'user') {
+      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const currentUserData = registeredUsers.find((u: any) => u.email === currentUser);
+      
+      if (currentUserData?.permissions) {
+        return allNavigation.filter(nav => 
+          nav.id === 'home' || currentUserData.permissions.includes(nav.id)
+        );
+      }
+    }
+    
+    return allNavigation;
+  };
 
   const handleLogout = () => {
     logout();
@@ -68,6 +84,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </div>
     );
   }
+
+  const navigation = getFilteredNavigation();
 
   return (
     <div className="min-h-screen bg-gray-50">
