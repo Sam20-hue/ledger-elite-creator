@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { InvoiceProvider } from "@/contexts/InvoiceContext";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import Layout from "@/components/Layout";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
@@ -16,6 +17,8 @@ import InvoicePreview from "@/components/InvoicePreview";
 import EnhancedClientManagement from "@/components/EnhancedClientManagement";
 import CompanySettings from "@/components/CompanySettings";
 import PaymentTracking from "@/components/PaymentTracking";
+import BankAccounts from "@/components/BankAccounts";
+import EmailService from "@/components/EmailService";
 import IntegrationsPage from "@/components/IntegrationsPage";
 import EnhancedSettings from "@/components/EnhancedSettings";
 import NotFound from "@/pages/NotFound";
@@ -24,33 +27,37 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <AuthProvider>
-        <InvoiceProvider>
-          <HashRouter>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/invoices" element={<InvoiceList />} />
-                <Route path="/invoices/new" element={<InvoiceForm />} />
-                <Route path="/invoices/:id" element={<InvoiceForm />} />
-                <Route path="/invoices/:id/preview" element={<InvoicePreview />} />
-                <Route path="/clients" element={<EnhancedClientManagement />} />
-                <Route path="/payments" element={<PaymentTracking />} />
-                <Route path="/company" element={<CompanySettings />} />
-                <Route path="/integrations" element={<IntegrationsPage />} />
-                <Route path="/settings" element={<EnhancedSettings />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Layout>
-          </HashRouter>
-        </InvoiceProvider>
-      </AuthProvider>
-    </TooltipProvider>
+    <ThemeProvider defaultTheme="system" storageKey="numera-ui-theme">
+      <TooltipProvider>
+        <Toaster />
+        <AuthProvider>
+          <InvoiceProvider>
+            <HashRouter>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/invoices" element={<InvoiceList />} />
+                  <Route path="/invoices/new" element={<InvoiceForm />} />
+                  <Route path="/invoices/:id" element={<InvoiceForm />} />
+                  <Route path="/invoices/:id/preview" element={<InvoicePreview />} />
+                  <Route path="/clients" element={<EnhancedClientManagement />} />
+                  <Route path="/payments" element={<PaymentTracking />} />
+                  <Route path="/bank-accounts" element={<BankAccounts />} />
+                  <Route path="/email-service" element={<EmailService />} />
+                  <Route path="/company" element={<CompanySettings />} />
+                  <Route path="/integrations" element={<IntegrationsPage />} />
+                  <Route path="/settings" element={<EnhancedSettings />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+            </HashRouter>
+          </InvoiceProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

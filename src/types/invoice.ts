@@ -1,3 +1,4 @@
+
 export interface Client {
   id: string;
   name: string;
@@ -16,6 +17,7 @@ export interface InvoiceItem {
   description: string;
   quantity: number;
   rate: number;
+  buyingPrice?: number;
   amount: number;
 }
 
@@ -31,10 +33,13 @@ export interface Invoice {
   tax: number;
   taxRate: number;
   total: number;
+  currency: string;
   status: 'draft' | 'sent' | 'paid' | 'overdue';
   notes: string;
   createdAt: string;
   updatedAt: string;
+  buyingTotal?: number;
+  profit?: number;
 }
 
 export interface Company {
@@ -48,4 +53,21 @@ export interface Company {
   email: string;
   website: string;
   taxId: string;
+}
+
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+  type: 'invoice' | 'reminder' | 'thank_you';
+}
+
+export interface OnlineUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  lastActivity: string;
+  isOnline: boolean;
 }

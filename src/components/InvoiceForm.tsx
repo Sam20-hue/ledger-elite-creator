@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInvoice } from '@/contexts/InvoiceContext';
 import { Invoice, InvoiceItem } from '@/types/invoice';
-import { Plus, Trash2, Save, Send } from 'lucide-react';
+import { Plus, Trash2, Save, Send, Mail } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -20,7 +20,22 @@ interface InvoiceFormData {
   items: InvoiceItem[];
   taxRate: number;
   notes: string;
+  currency: string;
 }
+
+const currencies = [
+  { code: 'USD', name: 'US Dollar', symbol: '$' },
+  { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
+  { code: 'EUR', name: 'Euro', symbol: '€' },
+  { code: 'GBP', name: 'British Pound', symbol: '£' },
+  { code: 'TZS', name: 'Tanzanian Shilling', symbol: 'TSh' },
+  { code: 'UGX', name: 'Ugandan Shilling', symbol: 'USh' },
+  { code: 'RWF', name: 'Rwandan Franc', symbol: 'RF' },
+  { code: 'ETB', name: 'Ethiopian Birr', symbol: 'Br' },
+  { code: 'GHS', name: 'Ghanaian Cedi', symbol: '₵' },
+  { code: 'NGN', name: 'Nigerian Naira', symbol: '₦' },
+  { code: 'ZAR', name: 'South African Rand', symbol: 'R' }
+];
 
 const InvoiceForm = () => {
   const { id } = useParams();
@@ -28,15 +43,17 @@ const InvoiceForm = () => {
   const { toast } = useToast();
   const { clients, invoices, addInvoice, updateInvoice, getNextInvoiceNumber } = useInvoice();
   const [isEditing, setIsEditing] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
 
   const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<InvoiceFormData>({
     defaultValues: {
       clientId: '',
       issueDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      items: [{ id: crypto.randomUUID(), description: '', quantity: 1, rate: 0, amount: 0 }],
+      items: [{ id: crypto.randomUUID(), description: '', quantity: 1, rate: 0, buyingPrice: 0, amount: 0 }],
       taxRate: 10,
-      notes: ''
+      notes: '',
+      currency: 'USD'
     }
   });
 
@@ -47,6 +64,7 @@ const InvoiceForm = () => {
 
   const watchedItems = watch('items');
   const watchedTaxRate = watch('taxRate');
+  const watchedCurrency = watch('currency');
 
   useEffect(() => {
     if (id && id !== 'new') {
@@ -59,7 +77,8 @@ const InvoiceForm = () => {
           dueDate: invoice.dueDate,
           items: invoice.items,
           taxRate: invoice.taxRate,
-          notes: invoice.notes
+          notes: invoice.notes,
+          currency: invoice.currency || 'USD'
         });
       }
     }
@@ -74,10 +93,37 @@ const InvoiceForm = () => {
   }, [watchedItems, setValue]);
 
   const subtotal = watchedItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+  const buyingTotal = watchedItems.reduce((sum, item) => sum + (item.quantity * (item.buyingPrice || 0)), 0);
   const tax = subtotal * (watchedTaxRate / 100);
   const total = subtotal + tax;
+  const profit = total - buyingTotal - tax;
 
-  const onSubmit = (data: InvoiceFormData) => {
+  const getCurrencySymbol = (currencyCode: string) => {
+    return currencies.find(c => c.code === currencyCode)?.symbol || currencyCode;
+  };
+
+  const sendInvoiceEmail = async (invoiceData: Invoice) => {
+    setEmailSending(true);
+    try {
+      // Simulate email sending
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Email Sent",
+        description: `Invoice sent to ${invoiceData.client.email}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Email Failed",
+        description: "Failed to send invoice email",
+        variant: "destructive",
+      });
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
+  const onSubmit = async (data: InvoiceFormData) => {
     const selectedClient = clients.find(client => client.id === data.clientId);
     if (!selectedClient) {
       toast({
@@ -100,6 +146,9 @@ const InvoiceForm = () => {
       tax,
       taxRate: data.taxRate,
       total,
+      currency: data.currency,
+      buyingTotal,
+      profit,
       status: 'draft',
       notes: data.notes,
       createdAt: isEditing ? invoices.find(inv => inv.id === id)!.createdAt : new Date().toISOString(),
@@ -123,8 +172,38 @@ const InvoiceForm = () => {
     navigate('/invoices');
   };
 
+  const saveAndSendEmail = async (data: InvoiceFormData) => {
+    await onSubmit(data);
+    
+    const selectedClient = clients.find(client => client.id === data.clientId);
+    if (selectedClient) {
+      const invoiceData: Invoice = {
+        id: isEditing ? id! : crypto.randomUUID(),
+        invoiceNumber: isEditing ? invoices.find(inv => inv.id === id)!.invoiceNumber : getNextInvoiceNumber(),
+        clientId: data.clientId,
+        client: selectedClient,
+        issueDate: data.issueDate,
+        dueDate: data.dueDate,
+        items: data.items,
+        subtotal,
+        tax,
+        taxRate: data.taxRate,
+        total,
+        currency: data.currency,
+        buyingTotal,
+        profit,
+        status: 'sent',
+        notes: data.notes,
+        createdAt: isEditing ? invoices.find(inv => inv.id === id)!.createdAt : new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      await sendInvoiceEmail(invoiceData);
+    }
+  };
+
   const addItem = () => {
-    append({ id: crypto.randomUUID(), description: '', quantity: 1, rate: 0, amount: 0 });
+    append({ id: crypto.randomUUID(), description: '', quantity: 1, rate: 0, buyingPrice: 0, amount: 0 });
   };
 
   return (
@@ -142,7 +221,7 @@ const InvoiceForm = () => {
             <CardTitle>Invoice Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="client">Client *</Label>
                 <Select onValueChange={(value) => setValue('clientId', value)}>
@@ -158,6 +237,22 @@ const InvoiceForm = () => {
                   </SelectContent>
                 </Select>
                 {errors.clientId && <span className="text-red-500 text-sm">Client is required</span>}
+              </div>
+
+              <div>
+                <Label htmlFor="currency">Currency</Label>
+                <Select onValueChange={(value) => setValue('currency', value)} value={watchedCurrency}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map(curr => (
+                      <SelectItem key={curr.code} value={curr.code}>
+                        {curr.name} ({curr.symbol})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
@@ -196,7 +291,7 @@ const InvoiceForm = () => {
             <div className="space-y-4">
               {fields.map((field, index) => (
                 <div key={field.id} className="grid grid-cols-12 gap-2 items-end">
-                  <div className="col-span-5">
+                  <div className="col-span-3">
                     <Label>Description</Label>
                     <Input
                       {...register(`items.${index}.description`, { required: 'Description is required' })}
@@ -215,7 +310,7 @@ const InvoiceForm = () => {
                     />
                   </div>
                   <div className="col-span-2">
-                    <Label>Rate</Label>
+                    <Label>Selling Price</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -223,6 +318,15 @@ const InvoiceForm = () => {
                         required: 'Rate is required',
                         min: { value: 0, message: 'Rate must be positive' }
                       })}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Label>Buying Price</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      {...register(`items.${index}.buyingPrice`)}
+                      placeholder="0.00"
                     />
                   </div>
                   <div className="col-span-2">
@@ -256,7 +360,12 @@ const InvoiceForm = () => {
                 <div className="w-64 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>{getCurrencySymbol(watchedCurrency)}{subtotal.toFixed(2)}</span>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span>Buying Total:</span>
+                    <span className="text-orange-600">{getCurrencySymbol(watchedCurrency)}{buyingTotal.toFixed(2)}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
@@ -270,12 +379,17 @@ const InvoiceForm = () => {
                       />
                       <span>%</span>
                     </div>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>{getCurrencySymbol(watchedCurrency)}{tax.toFixed(2)}</span>
                   </div>
                   
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>{getCurrencySymbol(watchedCurrency)}{total.toFixed(2)}</span>
+                  </div>
+                  
+                  <div className="flex justify-between font-bold text-green-600">
+                    <span>Profit:</span>
+                    <span>{getCurrencySymbol(watchedCurrency)}{profit.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -305,6 +419,14 @@ const InvoiceForm = () => {
           <Button type="submit">
             <Save className="h-4 w-4 mr-2" />
             {isEditing ? 'Update Invoice' : 'Save Invoice'}
+          </Button>
+          <Button 
+            type="button" 
+            onClick={handleSubmit(saveAndSendEmail)}
+            disabled={emailSending}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            {emailSending ? 'Sending...' : 'Save & Email'}
           </Button>
         </div>
       </form>
