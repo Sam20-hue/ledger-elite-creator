@@ -24,7 +24,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'numera-ui-theme',
+  storageKey = 'numera-ui-theme-global',
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
@@ -54,8 +54,24 @@ export function ThemeProvider({
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme);
       setTheme(theme);
+      
+      // Broadcast theme change to all tabs/windows
+      window.dispatchEvent(new CustomEvent('theme-changed', { detail: theme }));
     },
   };
+
+  // Listen for theme changes from other tabs
+  useEffect(() => {
+    const handleThemeChange = (event: CustomEvent) => {
+      setTheme(event.detail);
+    };
+
+    window.addEventListener('theme-changed', handleThemeChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('theme-changed', handleThemeChange as EventListener);
+    };
+  }, []);
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

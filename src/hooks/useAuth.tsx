@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: 'amayamusamson@gmail.com',
         password: '1029384756',
         createdAt: new Date().toISOString(),
-        permissions: ['dashboard', 'invoices', 'clients', 'payments', 'company', 'integrations', 'settings', 'admin'],
+        permissions: ['dashboard', 'invoices', 'clients', 'payments', 'financial-reports', 'payment-initiation', 'company', 'integrations', 'settings', 'admin'],
         role: 'admin'
       };
       registeredUsers.push(adminUser);
@@ -39,10 +39,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const role = localStorage.getItem('userRole');
     const user = localStorage.getItem('currentUser');
     
+    // Check if current user still exists in registered users
+    if (loggedIn && user) {
+      const currentUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const userExists = currentUsers.find((u: any) => u.email === user);
+      
+      if (!userExists) {
+        // User was deleted, automatically log out
+        logout();
+        return;
+      }
+    }
+    
     setIsLoggedIn(loggedIn);
     setUserRole(role);
     setCurrentUser(user);
   }, []);
+
+  // Check for user deletion every 30 seconds
+  useEffect(() => {
+    const checkUserExists = () => {
+      if (isLoggedIn && currentUser) {
+        const currentUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        const userExists = currentUsers.find((u: any) => u.email === currentUser);
+        
+        if (!userExists) {
+          logout();
+        }
+      }
+    };
+
+    const interval = setInterval(checkUserExists, 30000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn, currentUser]);
 
   const login = (email: string, password: string): boolean => {
     // Check for admin login

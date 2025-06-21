@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -16,7 +15,8 @@ import {
   Banknote,
   Mail,
   Moon,
-  Sun
+  Sun,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,7 +35,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Invoices', href: '/invoices', icon: FileText, id: 'invoices' },
     { name: 'Clients', href: '/clients', icon: Users, id: 'clients' },
     { name: 'Payments', href: '/payments', icon: CreditCard, id: 'payments' },
-    { name: 'Bank Accounts', href: '/bank-accounts', icon: Banknote, id: 'bank-accounts' },
+    { name: 'Accounts/Financial Reports', href: '/financial-reports', icon: Building2, id: 'financial-reports' },
+    { name: 'Payment Initiation', href: '/payment-initiation', icon: Shield, id: 'payment-initiation' },
     { name: 'Email Service', href: '/email-service', icon: Mail, id: 'email-service' },
     { name: 'Company', href: '/company', icon: Building2, id: 'company' },
     { name: 'Integrations', href: '/integrations', icon: LinkIcon, id: 'integrations' },
@@ -76,7 +77,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     localStorage.setItem('onlineUsers', JSON.stringify(filteredUsers));
     
     logout();
-    navigate('/');
+    navigate('/login');
   };
 
   const toggleTheme = () => {
@@ -94,7 +95,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <>{children}</>;
   }
 
-  // Show home page layout for non-logged in users
+  // Redirect all other routes to login if not logged in
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -102,7 +103,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
               <Link to="/" className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                Numera
+                Ledger Elite Creator
               </Link>
               <div className="flex items-center space-x-2">
                 <Button
@@ -131,7 +132,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg">
         <div className="flex h-16 items-center justify-center border-b dark:border-gray-700">
-          <h1 className="text-xl font-bold text-blue-600 dark:text-blue-400">Numera</h1>
+          <h1 className="text-xl font-bold text-blue-600 dark:text-blue-400">Ledger Elite Creator</h1>
         </div>
         
         <nav className="mt-6 px-3 flex-1 overflow-y-auto">

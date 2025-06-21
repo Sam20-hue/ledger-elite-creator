@@ -17,7 +17,8 @@ import InvoicePreview from "@/components/InvoicePreview";
 import EnhancedClientManagement from "@/components/EnhancedClientManagement";
 import CompanySettings from "@/components/CompanySettings";
 import PaymentTracking from "@/components/PaymentTracking";
-import BankAccounts from "@/components/BankAccounts";
+import FinancialReports from "@/components/FinancialReports";
+import PaymentInitiation from "@/components/PaymentInitiation";
 import EmailService from "@/components/EmailService";
 import IntegrationsPage from "@/components/IntegrationsPage";
 import EnhancedSettings from "@/components/EnhancedSettings";
@@ -27,7 +28,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system" storageKey="numera-ui-theme">
+    <ThemeProvider defaultTheme="system" storageKey="ledger-elite-ui-theme">
       <TooltipProvider>
         <Toaster />
         <AuthProvider>
@@ -45,7 +46,8 @@ const App = () => (
                   <Route path="/invoices/:id/preview" element={<InvoicePreview />} />
                   <Route path="/clients" element={<EnhancedClientManagement />} />
                   <Route path="/payments" element={<PaymentTracking />} />
-                  <Route path="/bank-accounts" element={<BankAccounts />} />
+                  <Route path="/financial-reports" element={<FinancialReports />} />
+                  <Route path="/payment-initiation" element={<PaymentInitiation />} />
                   <Route path="/email-service" element={<EmailService />} />
                   <Route path="/company" element={<CompanySettings />} />
                   <Route path="/integrations" element={<IntegrationsPage />} />
