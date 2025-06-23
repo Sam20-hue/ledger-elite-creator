@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,14 +14,25 @@ const FinancialReports = () => {
   const { userRole } = useAuth();
   const { toast } = useToast();
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
-  const [bankBalance, setBankBalance] = useState(50000);
+  const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+  const [initiatedPayments, setInitiatedPayments] = useState<any[]>([]);
   const [isFrozen, setIsFrozen] = useState(false);
 
-  // Calculate financial metrics
+  useEffect(() => {
+    // Load bank accounts and payments data
+    const accounts = JSON.parse(localStorage.getItem('bankAccounts') || '[]');
+    const payments = JSON.parse(localStorage.getItem('initiatedPayments') || '[]');
+    setBankAccounts(accounts);
+    setInitiatedPayments(payments);
+  }, []);
+
+  // Calculate financial metrics with real data
+  const totalBankBalance = bankAccounts.reduce((sum, account) => sum + account.balance, 0);
   const totalRevenue = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total, 0);
   const totalExpenses = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.buyingTotal || 0), 0);
-  const profit = totalRevenue - totalExpenses;
-  const assets = bankBalance + invoices.filter(inv => inv.status !== 'paid').reduce((sum, inv) => sum + inv.total, 0);
+  const totalPayments = initiatedPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  const profit = totalRevenue - totalExpenses - totalPayments;
+  const assets = totalBankBalance + invoices.filter(inv => inv.status !== 'paid').reduce((sum, inv) => sum + inv.total, 0);
   const liabilities = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.total, 0);
   const equity = assets - liabilities;
 
@@ -36,6 +46,7 @@ const FinancialReports = () => {
       return;
     }
     setIsFrozen(!isFrozen);
+    localStorage.setItem('systemFrozen', JSON.stringify(!isFrozen));
     toast({
       title: isFrozen ? "Payments Unfrozen" : "Payments Frozen",
       description: isFrozen ? "Users can now make changes" : "All payments and invoices are now frozen",
@@ -97,8 +108,8 @@ const FinancialReports = () => {
                 <div className="flex items-center space-x-2">
                   <BarChart3 className="h-8 w-8 text-blue-600" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Bank Balance</p>
-                    <p className="text-2xl font-bold">${bankBalance.toFixed(2)}</p>
+                    <p className="text-sm text-muted-foreground">Total Bank Balance</p>
+                    <p className="text-2xl font-bold">${totalBankBalance.toFixed(2)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -111,7 +122,9 @@ const FinancialReports = () => {
                     <FileText className="h-8 w-8 text-purple-600" />
                     <div>
                       <p className="text-sm text-muted-foreground">Net Profit</p>
-                      <p className="text-2xl font-bold text-green-600">${profit.toFixed(2)}</p>
+                      <p className={`text-2xl font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        ${profit.toFixed(2)}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -142,6 +155,37 @@ const FinancialReports = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Bank Accounts Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Bank Accounts Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Account Name</th>
+                      <th className="text-left py-2">Bank</th>
+                      <th className="text-right py-2">Balance</th>
+                      <th className="text-left py-2">Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bankAccounts.map((account, index) => (
+                      <tr key={index} className="border-b">
+                        <td className="py-2">{account.accountName}</td>
+                        <td className="py-2">{account.bankName}</td>
+                        <td className="text-right py-2">${account.balance.toFixed(2)}</td>
+                        <td className="py-2">{account.accountType}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="trial-balance">
@@ -162,12 +206,12 @@ const FinancialReports = () => {
                   <tbody>
                     <tr className="border-b">
                       <td className="py-2">Cash at Bank</td>
-                      <td className="text-right py-2">${bankBalance.toFixed(2)}</td>
+                      <td className="text-right py-2">${totalBankBalance.toFixed(2)}</td>
                       <td className="text-right py-2">-</td>
                     </tr>
                     <tr className="border-b">
                       <td className="py-2">Accounts Receivable</td>
-                      <td className="text-right py-2">${(assets - bankBalance).toFixed(2)}</td>
+                      <td className="text-right py-2">${(assets - totalBankBalance).toFixed(2)}</td>
                       <td className="text-right py-2">-</td>
                     </tr>
                     <tr className="border-b">
@@ -180,9 +224,14 @@ const FinancialReports = () => {
                       <td className="text-right py-2">${totalExpenses.toFixed(2)}</td>
                       <td className="text-right py-2">-</td>
                     </tr>
+                    <tr className="border-b">
+                      <td className="py-2">Payments</td>
+                      <td className="text-right py-2">${totalPayments.toFixed(2)}</td>
+                      <td className="text-right py-2">-</td>
+                    </tr>
                     <tr className="border-t-2 font-bold">
                       <td className="py-2">Total</td>
-                      <td className="text-right py-2">${(bankBalance + assets - bankBalance + totalExpenses).toFixed(2)}</td>
+                      <td className="text-right py-2">${(totalBankBalance + assets - totalBankBalance + totalExpenses + totalPayments).toFixed(2)}</td>
                       <td className="text-right py-2">${totalRevenue.toFixed(2)}</td>
                     </tr>
                   </tbody>
@@ -204,11 +253,11 @@ const FinancialReports = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Cash at Bank</span>
-                      <span>${bankBalance.toFixed(2)}</span>
+                      <span>${totalBankBalance.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Accounts Receivable</span>
-                      <span>${(assets - bankBalance).toFixed(2)}</span>
+                      <span>${(assets - totalBankBalance).toFixed(2)}</span>
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold">
                       <span>Total Assets</span>
@@ -258,6 +307,10 @@ const FinancialReports = () => {
                   <div className="flex justify-between">
                     <span>Cost of Goods Sold</span>
                     <span className="text-red-600">${totalExpenses.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Payments</span>
+                    <span className="text-red-600">${totalPayments.toFixed(2)}</span>
                   </div>
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
                     <span>Net Profit</span>

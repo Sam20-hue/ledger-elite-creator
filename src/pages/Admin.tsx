@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +33,18 @@ const availablePages = [
   { id: 'settings', name: 'Settings' },
   { id: 'admin', name: 'Admin Panel' }
 ];
+
+const getFilteredPages = (role: string) => {
+  if (role === 'user') {
+    return availablePages.filter(page => page.id !== 'admin' && page.id !== 'payment-initiation');
+  }
+  if (role === 'finance') {
+    return availablePages.filter(page => 
+      ['dashboard', 'invoices', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service'].includes(page.id)
+    );
+  }
+  return availablePages;
+};
 
 const Admin = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -142,18 +153,6 @@ const Admin = () => {
       setIsPermissionDialogOpen(false);
       setSelectedUser(null);
     }
-  };
-
-  const getFilteredPages = (role: string) => {
-    if (role === 'user') {
-      return availablePages.filter(page => page.id !== 'admin' && page.id !== 'payment-initiation');
-    }
-    if (role === 'finance') {
-      return availablePages.filter(page => 
-        ['dashboard', 'invoices', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service'].includes(page.id)
-      );
-    }
-    return availablePages;
   };
 
   return (

@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [currentUser]);
 
   const login = (email: string, password: string): boolean => {
-    // Check for admin login
+    // Check for admin login first
     if (email === 'amayamusamson@gmail.com' && password === '1029384756') {
       sessionStorage.setItem('userRole', 'admin');
       sessionStorage.setItem('isLoggedIn', 'true');
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return true;
     }
 
-    // Check for regular user login
+    // Check for regular user login from registered users
     const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     const user = registeredUsers.find((u: any) => u.email === email && u.password === password);
 

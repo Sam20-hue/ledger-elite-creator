@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Lock, CreditCard, Send } from 'lucide-react';
+import { Shield, CreditCard, Send } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import TwoStepVerification from './TwoStepVerification';
 
 const PaymentInitiation = () => {
-  const { userRole } = useAuth();
+  const { userRole, currentUser } = useAuth();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
   const [amount, setAmount] = useState('');
   const [recipient, setRecipient] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -21,23 +21,6 @@ const PaymentInitiation = () => {
   const [bankAccount, setBankAccount] = useState('');
   const [promptDialogOpen, setPromptDialogOpen] = useState(false);
   const [promptEmail, setPromptEmail] = useState('');
-
-  const authenticate = () => {
-    // Finance manager security password
-    if (password === 'finance2024secure' && userRole === 'admin') {
-      setIsAuthenticated(true);
-      toast({
-        title: "Authentication Successful",
-        description: "Access granted to payment initiation",
-      });
-    } else {
-      toast({
-        title: "Authentication Failed",
-        description: "Invalid credentials or insufficient permissions",
-        variant: "destructive",
-      });
-    }
-  };
 
   const initiatePayment = () => {
     if (!amount || !recipient || !paymentMethod) {
@@ -55,7 +38,7 @@ const PaymentInitiation = () => {
       amount: parseFloat(amount),
       recipient,
       paymentMethod,
-      initiatedBy: 'Finance Manager',
+      initiatedBy: currentUser || 'Finance Manager',
       timestamp: new Date().toISOString(),
       status: 'pending'
     };
@@ -63,6 +46,13 @@ const PaymentInitiation = () => {
     const existingPayments = JSON.parse(localStorage.getItem('initiatedPayments') || '[]');
     existingPayments.push(paymentRecord);
     localStorage.setItem('initiatedPayments', JSON.stringify(existingPayments));
+
+    // Update bank account balance
+    const bankAccounts = JSON.parse(localStorage.getItem('bankAccounts') || '[]');
+    if (bankAccounts.length > 0) {
+      bankAccounts[0].balance -= parseFloat(amount);
+      localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
+    }
 
     toast({
       title: "Payment Initiated",
@@ -131,7 +121,8 @@ const PaymentInitiation = () => {
     }
   };
 
-  if (userRole !== 'admin') {
+  // Only finance users and admins can access this page
+  if (userRole !== 'finance' && userRole !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Card className="w-96">
@@ -139,7 +130,7 @@ const PaymentInitiation = () => {
             <Shield className="h-12 w-12 mx-auto mb-4 text-red-500" />
             <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
             <p className="text-muted-foreground">
-              This section is only accessible to Finance Managers
+              This section is only accessible to Finance Managers and Administrators
             </p>
           </CardContent>
         </Card>
@@ -147,36 +138,19 @@ const PaymentInitiation = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  // Two-step verification for finance users
+  if (userRole === 'finance' && !isAuthenticated) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Card className="w-96">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Lock className="h-5 w-5" />
-              <span>Finance Manager Authentication</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Security Password</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter finance manager password"
-              />
-            </div>
-            <Button onClick={authenticate} className="w-full">
-              Authenticate
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              Demo password: finance2024secure
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <TwoStepVerification 
+        onVerificationSuccess={() => setIsAuthenticated(true)}
+        userEmail={currentUser || ''}
+      />
     );
+  }
+
+  // Admin bypass (no additional authentication needed)
+  if (userRole === 'admin' && !isAuthenticated) {
+    setIsAuthenticated(true);
   }
 
   return (
