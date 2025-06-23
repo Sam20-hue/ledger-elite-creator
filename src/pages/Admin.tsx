@@ -17,7 +17,7 @@ interface User {
   password: string;
   createdAt: string;
   permissions: string[];
-  role: 'admin' | 'sub-admin' | 'user';
+  role: 'admin' | 'sub-admin' | 'user' | 'finance';
 }
 
 const availablePages = [
@@ -45,7 +45,7 @@ const Admin = () => {
     email: '',
     password: '',
     permissions: [] as string[],
-    role: 'user' as 'admin' | 'sub-admin' | 'user'
+    role: 'user' as 'admin' | 'sub-admin' | 'user' | 'finance'
   });
   const { toast } = useToast();
 
@@ -345,7 +345,7 @@ const Admin = () => {
               <Label>User Role</Label>
               <Select 
                 value={selectedUser?.role || 'user'} 
-                onValueChange={(value: 'admin' | 'sub-admin' | 'user') => 
+                onValueChange={(value: 'admin' | 'sub-admin' | 'user' | 'finance') => 
                   selectedUser && setSelectedUser({...selectedUser, role: value})
                 }
               >
@@ -355,6 +355,7 @@ const Admin = () => {
                 <SelectContent>
                   <SelectItem value="user">Regular User</SelectItem>
                   <SelectItem value="sub-admin">Sub Admin</SelectItem>
+                  <SelectItem value="finance">Finance Manager</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
