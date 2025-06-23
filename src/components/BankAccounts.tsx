@@ -1,202 +1,168 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
+import { Building2, Plus, Edit, Trash2, DollarSign, CreditCard } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-
-interface BankAccount {
-  id: string;
-  name: string;
-  accountNumber: string;
-  balance: number;
-  currency: string;
-  type: 'savings' | 'checking' | 'business';
-}
-
-interface Transaction {
-  id: string;
-  accountId: string;
-  type: 'debit' | 'credit';
-  amount: number;
-  description: string;
-  date: string;
-  currency: string;
-}
 
 const BankAccounts = () => {
   const { toast } = useToast();
-  const [accounts, setAccounts] = useState<BankAccount[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
-  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
-  const [selectedAccountId, setSelectedAccountId] = useState('');
-  
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<any>(null);
   const [accountForm, setAccountForm] = useState({
-    name: '',
+    accountName: '',
+    bankName: '',
     accountNumber: '',
-    balance: 0,
-    currency: 'KES',
-    type: 'checking' as 'savings' | 'checking' | 'business'
+    accountType: 'checking',
+    balance: '',
+    currency: 'USD'
   });
 
-  const [transactionForm, setTransactionForm] = useState({
-    accountId: '',
-    type: 'credit' as 'debit' | 'credit',
-    amount: 0,
-    description: '',
-    currency: 'KES'
-  });
+  useEffect(() => {
+    // Load shared bank accounts
+    const savedAccounts = JSON.parse(localStorage.getItem('sharedBankAccounts') || '[]');
+    setAccounts(savedAccounts);
+  }, []);
 
-  const currencies = [
-    { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
-    { code: 'USD', name: 'US Dollar', symbol: '$' },
-    { code: 'TZS', name: 'Tanzanian Shilling', symbol: 'TSh' },
-    { code: 'UGX', name: 'Ugandan Shilling', symbol: 'USh' },
-    { code: 'RWF', name: 'Rwandan Franc', symbol: 'RF' },
-    { code: 'ETB', name: 'Ethiopian Birr', symbol: 'Br' },
-    { code: 'GHS', name: 'Ghanaian Cedi', symbol: '₵' },
-    { code: 'NGN', name: 'Nigerian Naira', symbol: '₦' },
-    { code: 'ZAR', name: 'South African Rand', symbol: 'R' }
-  ];
-
-  const addAccount = () => {
-    if (!accountForm.name || !accountForm.accountNumber) {
+  const saveAccount = () => {
+    if (!accountForm.accountName || !accountForm.bankName || !accountForm.accountNumber) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    const newAccount: BankAccount = {
-      id: crypto.randomUUID(),
-      ...accountForm
+    const newAccount = {
+      id: editingAccount?.id || crypto.randomUUID(),
+      ...accountForm,
+      balance: parseFloat(accountForm.balance) || 0,
+      createdAt: editingAccount?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
-    const updatedAccounts = [...accounts, newAccount];
-    setAccounts(updatedAccounts);
-    localStorage.setItem('bankAccounts', JSON.stringify(updatedAccounts));
-
-    toast({
-      title: "Success",
-      description: "Bank account added successfully"
-    });
-
-    setAccountForm({ name: '', accountNumber: '', balance: 0, currency: 'KES', type: 'checking' });
-    setIsAccountDialogOpen(false);
-  };
-
-  const addTransaction = () => {
-    if (!transactionForm.accountId || !transactionForm.amount || !transactionForm.description) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
+    let updatedAccounts;
+    if (editingAccount) {
+      updatedAccounts = accounts.map(acc => acc.id === editingAccount.id ? newAccount : acc);
+    } else {
+      updatedAccounts = [...accounts, newAccount];
     }
 
-    const newTransaction: Transaction = {
-      id: crypto.randomUUID(),
-      ...transactionForm,
-      date: new Date().toISOString()
-    };
-
-    // Update account balance
-    const updatedAccounts = accounts.map(account => {
-      if (account.id === transactionForm.accountId) {
-        const balanceChange = transactionForm.type === 'credit' 
-          ? transactionForm.amount 
-          : -transactionForm.amount;
-        return { ...account, balance: account.balance + balanceChange };
-      }
-      return account;
-    });
-
-    const updatedTransactions = [...transactions, newTransaction];
-    
     setAccounts(updatedAccounts);
-    setTransactions(updatedTransactions);
-    localStorage.setItem('bankAccounts', JSON.stringify(updatedAccounts));
-    localStorage.setItem('bankTransactions', JSON.stringify(updatedTransactions));
+    localStorage.setItem('sharedBankAccounts', JSON.stringify(updatedAccounts));
 
     toast({
       title: "Success",
-      description: `${transactionForm.type === 'credit' ? 'Credit' : 'Debit'} transaction added successfully`
+      description: editingAccount ? "Account updated successfully" : "Account added successfully",
     });
 
-    setTransactionForm({ accountId: '', type: 'credit', amount: 0, description: '', currency: 'KES' });
-    setIsTransactionDialogOpen(false);
+    resetForm();
   };
 
   const deleteAccount = (id: string) => {
     if (confirm('Are you sure you want to delete this account?')) {
-      const updatedAccounts = accounts.filter(account => account.id !== id);
+      const updatedAccounts = accounts.filter(acc => acc.id !== id);
       setAccounts(updatedAccounts);
-      localStorage.setItem('bankAccounts', JSON.stringify(updatedAccounts));
+      localStorage.setItem('sharedBankAccounts', JSON.stringify(updatedAccounts));
       
       toast({
         title: "Success",
-        description: "Account deleted successfully"
+        description: "Account deleted successfully",
       });
     }
   };
 
-  const getCurrencySymbol = (code: string) => {
-    return currencies.find(c => c.code === code)?.symbol || code;
+  const resetForm = () => {
+    setAccountForm({
+      accountName: '',
+      bankName: '',
+      accountNumber: '',
+      accountType: 'checking',
+      balance: '',
+      currency: 'USD'
+    });
+    setEditingAccount(null);
+    setIsDialogOpen(false);
   };
 
-  const getAccountTransactions = (accountId: string) => {
-    return transactions.filter(t => t.accountId === accountId);
+  const editAccount = (account: any) => {
+    setAccountForm({
+      accountName: account.accountName,
+      bankName: account.bankName,
+      accountNumber: account.accountNumber,
+      accountType: account.accountType,
+      balance: account.balance.toString(),
+      currency: account.currency
+    });
+    setEditingAccount(account);
+    setIsDialogOpen(true);
   };
+
+  const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Bank Accounts</h2>
-        <div className="space-x-2">
-          <Dialog open={isAccountDialogOpen} onOpenChange={setIsAccountDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Account
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Bank Account</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
+        <div className="flex items-center space-x-3">
+          <Building2 className="h-8 w-8 text-blue-600" />
+          <h1 className="text-3xl font-bold">Bank Accounts</h1>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => resetForm()}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Account
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingAccount ? 'Edit Account' : 'Add New Account'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Account Name</Label>
+                <Input
+                  value={accountForm.accountName}
+                  onChange={(e) => setAccountForm(prev => ({ ...prev, accountName: e.target.value }))}
+                  placeholder="Main Business Account"
+                />
+              </div>
+              <div>
+                <Label>Bank Name</Label>
+                <Input
+                  value={accountForm.bankName}
+                  onChange={(e) => setAccountForm(prev => ({ ...prev, bankName: e.target.value }))}
+                  placeholder="Bank of America"
+                />
+              </div>
+              <div>
+                <Label>Account Number</Label>
+                <Input
+                  value={accountForm.accountNumber}
+                  onChange={(e) => setAccountForm(prev => ({ ...prev, accountNumber: e.target.value }))}
+                  placeholder="1234567890"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Account Name</Label>
-                  <Input
-                    value={accountForm.name}
-                    onChange={(e) => setAccountForm(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Main Business Account"
-                  />
-                </div>
-                <div>
-                  <Label>Account Number</Label>
-                  <Input
-                    value={accountForm.accountNumber}
-                    onChange={(e) => setAccountForm(prev => ({ ...prev, accountNumber: e.target.value }))}
-                    placeholder="1234567890"
-                  />
-                </div>
-                <div>
-                  <Label>Initial Balance</Label>
-                  <Input
-                    type="number"
-                    value={accountForm.balance}
-                    onChange={(e) => setAccountForm(prev => ({ ...prev, balance: parseFloat(e.target.value) }))}
-                    placeholder="0.00"
-                  />
+                  <Label>Account Type</Label>
+                  <Select value={accountForm.accountType} onValueChange={(value) => setAccountForm(prev => ({ ...prev, accountType: value }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="checking">Checking</SelectItem>
+                      <SelectItem value="savings">Savings</SelectItem>
+                      <SelectItem value="business">Business</SelectItem>
+                      <SelectItem value="credit">Credit</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>Currency</Label>
@@ -205,162 +171,106 @@ const BankAccounts = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {currencies.map((currency) => (
-                        <SelectItem key={currency.code} value={currency.code}>
-                          {currency.name} ({currency.symbol})
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="KES">KES (KSh)</SelectItem>
+                      <SelectItem value="TZS">TZS (TSh)</SelectItem>
+                      <SelectItem value="UGX">UGX (USh)</SelectItem>
+                      <SelectItem value="EUR">EUR (€)</SelectItem>
+                      <SelectItem value="GBP">GBP (£)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Account Type</Label>
-                  <Select value={accountForm.type} onValueChange={(value: 'savings' | 'checking' | 'business') => setAccountForm(prev => ({ ...prev, type: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="checking">Checking</SelectItem>
-                      <SelectItem value="savings">Savings</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button onClick={addAccount} className="w-full">
-                  Add Account
-                </Button>
               </div>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Add Transaction
+              <div>
+                <Label>Current Balance</Label>
+                <Input
+                  type="number"
+                  value={accountForm.balance}
+                  onChange={(e) => setAccountForm(prev => ({ ...prev, balance: e.target.value }))}
+                  placeholder="0.00"
+                />
+              </div>
+              <Button onClick={saveAccount} className="w-full">
+                {editingAccount ? 'Update Account' : 'Add Account'}
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Transaction</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Account</Label>
-                  <Select value={transactionForm.accountId} onValueChange={(value) => setTransactionForm(prev => ({ ...prev, accountId: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select account" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {accounts.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.name} - {account.accountNumber}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Transaction Type</Label>
-                  <Select value={transactionForm.type} onValueChange={(value: 'debit' | 'credit') => setTransactionForm(prev => ({ ...prev, type: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="credit">Credit (Money In)</SelectItem>
-                      <SelectItem value="debit">Debit (Money Out)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Amount</Label>
-                  <Input
-                    type="number"
-                    value={transactionForm.amount}
-                    onChange={(e) => setTransactionForm(prev => ({ ...prev, amount: parseFloat(e.target.value) }))}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <Label>Description</Label>
-                  <Input
-                    value={transactionForm.description}
-                    onChange={(e) => setTransactionForm(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Payment from client"
-                  />
-                </div>
-                <Button onClick={addTransaction} className="w-full">
-                  Add Transaction
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
+      {/* Total Balance Card */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-green-100 rounded-full">
+              <DollarSign className="h-8 w-8 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Balance (All Accounts)</p>
+              <p className="text-3xl font-bold">${totalBalance.toFixed(2)}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Accounts List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {accounts.map((account) => (
           <Card key={account.id}>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>{account.name}</span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => deleteAccount(account.id)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="text-lg">{account.accountName}</CardTitle>
+                </div>
+                <div className="flex space-x-1">
+                  <Button size="sm" variant="outline" onClick={() => editAccount(account)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => deleteAccount(account.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Account: {account.accountNumber}</p>
-                <p className="text-2xl font-bold">
-                  {getCurrencySymbol(account.currency)} {account.balance.toFixed(2)}
-                </p>
-                <p className="text-sm capitalize">{account.type} Account</p>
-                <div className="mt-4">
-                  <h4 className="font-medium mb-2">Recent Transactions</h4>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {getAccountTransactions(account.id).slice(-3).map((transaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between text-sm">
-                        <div className="flex items-center space-x-1">
-                          {transaction.type === 'credit' ? (
-                            <TrendingUp className="h-3 w-3 text-green-600" />
-                          ) : (
-                            <TrendingDown className="h-3 w-3 text-red-600" />
-                          )}
-                          <span className="truncate max-w-20">{transaction.description}</span>
-                        </div>
-                        <span className={transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}>
-                          {transaction.type === 'credit' ? '+' : '-'}{getCurrencySymbol(transaction.currency)}{transaction.amount}
-                        </span>
-                      </div>
-                    ))}
-                    {getAccountTransactions(account.id).length === 0 && (
-                      <p className="text-xs text-muted-foreground">No transactions yet</p>
-                    )}
-                  </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Bank</p>
+                  <p className="font-medium">{account.bankName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Account Number</p>
+                  <p className="font-medium">****{account.accountNumber.slice(-4)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Type</p>
+                  <p className="font-medium capitalize">{account.accountType}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Balance</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {account.currency === 'USD' ? '$' : account.currency + ' '}{account.balance.toFixed(2)}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
-        
-        {accounts.length === 0 && (
-          <Card className="col-span-full">
-            <CardContent className="pt-6 text-center">
-              <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">No bank accounts added yet</p>
-              <Button onClick={() => setIsAccountDialogOpen(true)}>
-                Add Your First Account
-              </Button>
-            </CardContent>
-          </Card>
-        )}
       </div>
+
+      {accounts.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-8">
+            <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground mb-4">No bank accounts found</p>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Your First Account
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

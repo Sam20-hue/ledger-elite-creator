@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,13 @@ const PaymentInitiation = () => {
   const [bankAccount, setBankAccount] = useState('');
   const [promptDialogOpen, setPromptDialogOpen] = useState(false);
   const [promptEmail, setPromptEmail] = useState('');
+  const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Load shared bank accounts
+    const accounts = JSON.parse(localStorage.getItem('sharedBankAccounts') || '[]');
+    setBankAccounts(accounts);
+  }, []);
 
   const initiatePayment = () => {
     if (!amount || !recipient || !paymentMethod) {
@@ -43,15 +50,19 @@ const PaymentInitiation = () => {
       status: 'pending'
     };
 
-    const existingPayments = JSON.parse(localStorage.getItem('initiatedPayments') || '[]');
+    const existingPayments = JSON.parse(localStorage.getItem('sharedInitiatedPayments') || '[]');
     existingPayments.push(paymentRecord);
-    localStorage.setItem('initiatedPayments', JSON.stringify(existingPayments));
+    localStorage.setItem('sharedInitiatedPayments', JSON.stringify(existingPayments));
 
     // Update bank account balance
-    const bankAccounts = JSON.parse(localStorage.getItem('bankAccounts') || '[]');
     if (bankAccounts.length > 0) {
-      bankAccounts[0].balance -= parseFloat(amount);
-      localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
+      const updatedAccounts = bankAccounts.map(account => {
+        if (account.id === bankAccounts[0].id) {
+          return { ...account, balance: account.balance - parseFloat(amount) };
+        }
+        return account;
+      });
+      localStorage.setItem('sharedBankAccounts', JSON.stringify(updatedAccounts));
     }
 
     toast({

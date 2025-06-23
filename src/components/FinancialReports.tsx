@@ -19,14 +19,16 @@ const FinancialReports = () => {
   const [isFrozen, setIsFrozen] = useState(false);
 
   useEffect(() => {
-    // Load bank accounts and payments data
-    const accounts = JSON.parse(localStorage.getItem('bankAccounts') || '[]');
-    const payments = JSON.parse(localStorage.getItem('initiatedPayments') || '[]');
+    // Load shared data
+    const accounts = JSON.parse(localStorage.getItem('sharedBankAccounts') || '[]');
+    const payments = JSON.parse(localStorage.getItem('sharedInitiatedPayments') || '[]');
+    const frozen = JSON.parse(localStorage.getItem('systemFrozen') || 'false');
     setBankAccounts(accounts);
     setInitiatedPayments(payments);
+    setIsFrozen(frozen);
   }, []);
 
-  // Calculate financial metrics with real data
+  // Calculate financial metrics with shared data
   const totalBankBalance = bankAccounts.reduce((sum, account) => sum + account.balance, 0);
   const totalRevenue = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total, 0);
   const totalExpenses = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.buyingTotal || 0), 0);

@@ -4,11 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useInvoice } from '@/contexts/InvoiceContext';
-import { DollarSign, FileText, Users, TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { DollarSign, FileText, Users, TrendingUp, Clock, CheckCircle, AlertCircle, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   const { invoices, clients } = useInvoice();
+  const [bankAccounts, setBankAccounts] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    // Load shared bank accounts
+    const accounts = JSON.parse(localStorage.getItem('sharedBankAccounts') || '[]');
+    setBankAccounts(accounts);
+  }, []);
 
   const totalRevenue = invoices
     .filter(inv => inv.status === 'paid')
@@ -17,6 +24,8 @@ const Dashboard = () => {
   const pendingAmount = invoices
     .filter(inv => inv.status === 'sent')
     .reduce((sum, inv) => sum + inv.total, 0);
+
+  const totalBankBalance = bankAccounts.reduce((sum, account) => sum + account.balance, 0);
 
   const overdueInvoices = invoices.filter(inv => {
     const dueDate = new Date(inv.dueDate);
@@ -73,12 +82,12 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Bank Balance</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{invoices.length}</div>
-            <p className="text-xs text-muted-foreground">All time</p>
+            <div className="text-2xl font-bold">${totalBankBalance.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">Total in all accounts</p>
           </CardContent>
         </Card>
 
@@ -124,35 +133,39 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Overdue Invoices */}
+        {/* Bank Accounts Summary */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <AlertCircle className="mr-2 h-5 w-5 text-red-500" />
-              Overdue Invoices
+              <Building2 className="mr-2 h-5 w-5 text-blue-500" />
+              Bank Accounts
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {overdueInvoices.length === 0 ? (
+              {bankAccounts.length === 0 ? (
                 <div className="text-center py-4">
-                  <CheckCircle className="mx-auto h-8 w-8 text-green-500 mb-2" />
-                  <p className="text-muted-foreground">No overdue invoices!</p>
+                  <Building2 className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-muted-foreground">No bank accounts added</p>
                 </div>
               ) : (
-                overdueInvoices.map((invoice) => (
-                  <div key={invoice.id} className="flex items-center justify-between p-3 border border-red-200 rounded-lg bg-red-50">
+                bankAccounts.slice(0, 3).map((account) => (
+                  <div key={account.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <p className="font-medium">{invoice.invoiceNumber}</p>
-                      <p className="text-sm text-muted-foreground">{invoice.client.name}</p>
-                      <p className="text-xs text-red-600">Due: {new Date(invoice.dueDate).toLocaleDateString()}</p>
+                      <p className="font-medium">{account.accountName}</p>
+                      <p className="text-sm text-muted-foreground">{account.bankName}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">${invoice.total.toFixed(2)}</p>
-                      <Badge className="bg-red-100 text-red-800">Overdue</Badge>
+                      <p className="font-medium">${account.balance.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{account.accountType}</p>
                     </div>
                   </div>
                 ))
+              )}
+              {bankAccounts.length > 3 && (
+                <p className="text-sm text-muted-foreground text-center">
+                  +{bankAccounts.length - 3} more accounts
+                </p>
               )}
             </div>
           </CardContent>

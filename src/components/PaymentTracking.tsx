@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +21,16 @@ const PaymentTracking = () => {
   const [emailSubject, setEmailSubject] = useState('Payment Reminder');
   const [emailMessage, setEmailMessage] = useState('');
   const [bankAccount, setBankAccount] = useState('');
+  const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+  const [initiatedPayments, setInitiatedPayments] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Load shared data
+    const accounts = JSON.parse(localStorage.getItem('sharedBankAccounts') || '[]');
+    const payments = JSON.parse(localStorage.getItem('sharedInitiatedPayments') || '[]');
+    setBankAccounts(accounts);
+    setInitiatedPayments(payments);
+  }, []);
 
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch = 
@@ -79,13 +88,12 @@ const PaymentTracking = () => {
     setPaymentDialogOpen(false);
   };
 
-  // Calculate statistics with profit tracking
+  // Calculate statistics with shared data
   const totalAmount = invoices.reduce((sum, inv) => sum + inv.total, 0);
   const paidAmount = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.total, 0);
   const pendingAmount = invoices.filter(inv => inv.status !== 'paid').reduce((sum, inv) => sum + inv.total, 0);
   const overdueInvoices = invoices.filter(inv => inv.status === 'overdue').length;
-  
-  // Sample profit calculation (assuming 30% profit margin for demo)
+  const totalBankBalance = bankAccounts.reduce((sum, account) => sum + account.balance, 0);
   const estimatedProfit = paidAmount * 0.3;
 
   return (
@@ -138,8 +146,8 @@ const PaymentTracking = () => {
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-8 w-8 text-red-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Overdue Invoices</p>
-                <p className="text-2xl font-bold">{overdueInvoices}</p>
+                <p className="text-sm text-muted-foreground">Bank Balance</p>
+                <p className="text-2xl font-bold">${totalBankBalance.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
