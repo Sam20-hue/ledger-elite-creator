@@ -34,9 +34,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Dashboard', href: '/dashboard', icon: BarChart3, id: 'dashboard' },
     { name: 'Invoices', href: '/invoices', icon: FileText, id: 'invoices' },
     { name: 'Clients', href: '/clients', icon: Users, id: 'clients' },
-    { name: 'Payments', href: '/payments', icon: CreditCard, id: 'payments' },
-    { name: 'Accounts/Financial Reports', href: '/financial-reports', icon: Building2, id: 'financial-reports' },
-    { name: 'Payment Initiation', href: '/payment-initiation', icon: Shield, id: 'payment-initiation' },
+    { 
+      name: 'Accounts/Financial Reports', 
+      href: '/financial-reports', 
+      icon: Building2, 
+      id: 'financial-reports',
+      subItems: [
+        { name: 'Bank Accounts', href: '/bank-accounts', icon: CreditCard, id: 'bank-accounts' },
+        { name: 'Payments', href: '/payments', icon: Banknote, id: 'payments' },
+        { name: 'Payment Initiation', href: '/payment-initiation', icon: Shield, id: 'payment-initiation' }
+      ]
+    },
     { name: 'Email Service', href: '/email-service', icon: Mail, id: 'email-service' },
     { name: 'Company', href: '/company', icon: Building2, id: 'company' },
     { name: 'Integrations', href: '/integrations', icon: LinkIcon, id: 'integrations' },
@@ -138,19 +146,44 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <nav className="mt-6 px-3 flex-1 overflow-y-auto">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href;
+            const isParentActive = item.subItems?.some(subItem => location.pathname === subItem.href);
+            
             return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors ${
-                  isActive
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.name}
-              </Link>
+              <div key={item.name}>
+                <Link
+                  to={item.href}
+                  className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md mb-1 transition-colors ${
+                    isActive || isParentActive
+                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                </Link>
+                
+                {item.subItems && (isActive || isParentActive) && (
+                  <div className="ml-6 mb-2">
+                    {item.subItems.map((subItem) => {
+                      const isSubActive = location.pathname === subItem.href;
+                      return (
+                        <Link
+                          key={subItem.name}
+                          to={subItem.href}
+                          className={`group flex items-center px-3 py-1 text-sm rounded-md mb-1 transition-colors ${
+                            isSubActive
+                              ? 'bg-blue-50 dark:bg-blue-800 text-blue-600 dark:text-blue-200'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white'
+                          }`}
+                        >
+                          <subItem.icon className="mr-2 h-4 w-4" />
+                          {subItem.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>

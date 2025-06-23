@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -23,6 +22,7 @@ import EmailService from "@/components/EmailService";
 import IntegrationsPage from "@/components/IntegrationsPage";
 import EnhancedSettings from "@/components/EnhancedSettings";
 import NotFound from "@/pages/NotFound";
+import BankAccounts from "@/components/BankAccounts";
 
 const queryClient = new QueryClient();
 
@@ -45,8 +45,9 @@ const App = () => (
                   <Route path="/invoices/:id" element={<InvoiceForm />} />
                   <Route path="/invoices/:id/preview" element={<InvoicePreview />} />
                   <Route path="/clients" element={<EnhancedClientManagement />} />
-                  <Route path="/payments" element={<PaymentTracking />} />
                   <Route path="/financial-reports" element={<FinancialReports />} />
+                  <Route path="/bank-accounts" element={<BankAccounts />} />
+                  <Route path="/payments" element={<PaymentTracking />} />
                   <Route path="/payment-initiation" element={<PaymentInitiation />} />
                   <Route path="/email-service" element={<EmailService />} />
                   <Route path="/company" element={<CompanySettings />} />

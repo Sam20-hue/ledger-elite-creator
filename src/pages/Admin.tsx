@@ -24,7 +24,11 @@ const availablePages = [
   { id: 'dashboard', name: 'Dashboard' },
   { id: 'invoices', name: 'Invoices' },
   { id: 'clients', name: 'Clients' },
+  { id: 'financial-reports', name: 'Accounts/Financial Reports' },
+  { id: 'bank-accounts', name: 'Bank Accounts' },
   { id: 'payments', name: 'Payments' },
+  { id: 'payment-initiation', name: 'Payment Initiation' },
+  { id: 'email-service', name: 'Email Service' },
   { id: 'company', name: 'Company Settings' },
   { id: 'integrations', name: 'Integrations' },
   { id: 'settings', name: 'Settings' },
@@ -142,7 +146,12 @@ const Admin = () => {
 
   const getFilteredPages = (role: string) => {
     if (role === 'user') {
-      return availablePages.filter(page => page.id !== 'admin');
+      return availablePages.filter(page => page.id !== 'admin' && page.id !== 'payment-initiation');
+    }
+    if (role === 'finance') {
+      return availablePages.filter(page => 
+        ['dashboard', 'invoices', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service'].includes(page.id)
+      );
     }
     return availablePages;
   };
@@ -203,13 +212,14 @@ const Admin = () => {
               </div>
               <div>
                 <Label htmlFor="role">User Role</Label>
-                <Select value={formData.role} onValueChange={(value: 'admin' | 'sub-admin' | 'user') => setFormData(prev => ({ ...prev, role: value }))}>
+                <Select value={formData.role} onValueChange={(value: 'admin' | 'sub-admin' | 'user' | 'finance') => setFormData(prev => ({ ...prev, role: value }))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="user">Regular User</SelectItem>
                     <SelectItem value="sub-admin">Sub Admin</SelectItem>
+                    <SelectItem value="finance">Finance Manager</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>

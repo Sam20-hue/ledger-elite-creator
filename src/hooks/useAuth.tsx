@@ -28,16 +28,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: 'amayamusamson@gmail.com',
         password: '1029384756',
         createdAt: new Date().toISOString(),
-        permissions: ['dashboard', 'invoices', 'clients', 'payments', 'financial-reports', 'payment-initiation', 'company', 'integrations', 'settings', 'admin'],
+        permissions: ['dashboard', 'invoices', 'clients', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service', 'company', 'integrations', 'settings', 'admin'],
         role: 'admin'
       };
       registeredUsers.push(adminUser);
       localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
     }
 
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const role = localStorage.getItem('userRole');
-    const user = localStorage.getItem('currentUser');
+    // Use sessionStorage instead of localStorage for login state
+    const loggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+    const role = sessionStorage.getItem('userRole');
+    const user = sessionStorage.getItem('currentUser');
     
     // Check if current user still exists in registered users
     if (loggedIn && user) {
@@ -73,15 +74,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => clearInterval(interval);
   }, [isLoggedIn, currentUser]);
 
+  // Auto-logout on browser close
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Remove online user status
+      if (currentUser) {
+        const users = JSON.parse(localStorage.getItem('onlineUsers') || '[]');
+        const filteredUsers = users.filter((u: any) => u.email !== currentUser);
+        localStorage.setItem('onlineUsers', JSON.stringify(filteredUsers));
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [currentUser]);
+
   const login = (email: string, password: string): boolean => {
     // Check for admin login
     if (email === 'amayamusamson@gmail.com' && password === '1029384756') {
-      localStorage.setItem('userRole', 'admin');
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('currentUser', email);
+      sessionStorage.setItem('userRole', 'admin');
+      sessionStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.setItem('currentUser', email);
       setIsLoggedIn(true);
       setUserRole('admin');
       setCurrentUser(email);
+      
+      // Add to online users
+      const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers') || '[]');
+      const existingUser = onlineUsers.find((u: any) => u.email === email);
+      if (!existingUser) {
+        onlineUsers.push({ email, name: 'Admin User', loginTime: new Date().toISOString() });
+        localStorage.setItem('onlineUsers', JSON.stringify(onlineUsers));
+      }
+      
       return true;
     }
 
@@ -91,12 +116,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (user) {
       const role = user.role || 'user';
-      localStorage.setItem('userRole', role);
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('currentUser', email);
+      sessionStorage.setItem('userRole', role);
+      sessionStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.setItem('currentUser', email);
       setIsLoggedIn(true);
       setUserRole(role);
       setCurrentUser(email);
+      
+      // Add to online users
+      const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers') || '[]');
+      const existingUser = onlineUsers.find((u: any) => u.email === email);
+      if (!existingUser) {
+        onlineUsers.push({ email, name: user.name, loginTime: new Date().toISOString() });
+        localStorage.setItem('onlineUsers', JSON.stringify(onlineUsers));
+      }
+      
       return true;
     }
 
@@ -104,9 +138,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('currentUser');
+    // Remove online user status
+    if (currentUser) {
+      const users = JSON.parse(localStorage.getItem('onlineUsers') || '[]');
+      const filteredUsers = users.filter((u: any) => u.email !== currentUser);
+      localStorage.setItem('onlineUsers', JSON.stringify(filteredUsers));
+    }
+    
+    sessionStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('userRole');
+    sessionStorage.removeItem('currentUser');
     setIsLoggedIn(false);
     setUserRole(null);
     setCurrentUser(null);
