@@ -47,81 +47,81 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4">
+    <div className="space-y-3 sm:space-y-4 lg:space-y-6 p-1 sm:p-2 lg:p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-        <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Dashboard</h1>
         <Link to="/invoices/new">
-          <Button className="w-full sm:w-auto">Create New Invoice</Button>
+          <Button size="sm" className="w-full sm:w-auto text-xs sm:text-sm">Create New Invoice</Button>
         </Link>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-6">
+        <Card className="save-animation">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+          <CardContent className="pb-2">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">From paid invoices</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+        <Card className="save-animation">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Pending Amount</CardTitle>
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">${pendingAmount.toFixed(2)}</div>
+          <CardContent className="pb-2">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">${pendingAmount.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">Awaiting payment</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bank Balance</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+        <Card className="save-animation">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Bank Balance</CardTitle>
+            <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">${totalBankBalance.toFixed(2)}</div>
+          <CardContent className="pb-2">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">${totalBankBalance.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">Total in all accounts</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+        <Card className="save-animation">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Clients</CardTitle>
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">{clients.length}</div>
+          <CardContent className="pb-2">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">{clients.length}</div>
             <p className="text-xs text-muted-foreground">Active clients</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         {/* Recent Invoices */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Recent Invoices</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base sm:text-lg lg:text-xl">Recent Invoices</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               {recentInvoices.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">No invoices yet</p>
+                <p className="text-muted-foreground text-center py-4 text-sm">No invoices yet</p>
               ) : (
                 recentInvoices.map((invoice) => (
-                  <div key={invoice.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg space-y-2 sm:space-y-0">
+                  <div key={invoice.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-3 border rounded-lg space-y-1 sm:space-y-0 save-animation">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{invoice.invoiceNumber}</p>
-                      <p className="text-sm text-muted-foreground truncate">{invoice.client.name}</p>
+                      <p className="font-medium truncate text-sm">{invoice.invoiceNumber}</p>
+                      <p className="text-xs text-muted-foreground truncate">{invoice.client.name}</p>
                     </div>
                     <div className="flex flex-row sm:flex-col items-center sm:items-end space-x-2 sm:space-x-0 sm:space-y-1">
-                      <p className="font-medium">${invoice.total.toFixed(2)}</p>
-                      <Badge className={getStatusColor(invoice.status)}>
+                      <p className="font-medium text-sm">${invoice.total.toFixed(2)}</p>
+                      <Badge className={`${getStatusColor(invoice.status)} text-xs`}>
                         {invoice.status}
                       </Badge>
                     </div>
@@ -134,35 +134,35 @@ const Dashboard = () => {
 
         {/* Bank Accounts Summary */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg sm:text-xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-base sm:text-lg lg:text-xl">
               <Building2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
               Bank Accounts
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               {bankAccounts.length === 0 ? (
                 <div className="text-center py-4">
                   <Building2 className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">No bank accounts added</p>
+                  <p className="text-muted-foreground text-sm">No bank accounts added</p>
                 </div>
               ) : (
                 bankAccounts.slice(0, 3).map((account) => (
-                  <div key={account.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg space-y-2 sm:space-y-0">
+                  <div key={account.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 sm:p-3 border rounded-lg space-y-1 sm:space-y-0 save-animation">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{account.accountName}</p>
-                      <p className="text-sm text-muted-foreground truncate">{account.bankName}</p>
+                      <p className="font-medium truncate text-sm">{account.accountName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{account.bankName}</p>
                     </div>
                     <div className="flex flex-row sm:flex-col items-center sm:items-end space-x-2 sm:space-x-0 sm:space-y-1">
-                      <p className="font-medium">${account.balance.toFixed(2)}</p>
+                      <p className="font-medium text-sm">${account.balance.toFixed(2)}</p>
                       <p className="text-xs text-muted-foreground capitalize">{account.accountType}</p>
                     </div>
                   </div>
                 ))
               )}
               {bankAccounts.length > 3 && (
-                <p className="text-sm text-muted-foreground text-center">
+                <p className="text-xs text-muted-foreground text-center">
                   +{bankAccounts.length - 3} more accounts
                 </p>
               )}

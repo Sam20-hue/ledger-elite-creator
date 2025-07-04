@@ -35,7 +35,7 @@
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 217.2 32.6% 17.5%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
@@ -66,5 +66,138 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 14px;
+  }
+}
+
+/* Invoice Preview - Always Light Theme */
+.invoice-preview {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+.invoice-preview * {
+  background: inherit !important;
+  color: inherit !important;
+}
+
+.invoice-preview table {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+.invoice-preview th {
+  background: #f5f5f5 !important;
+  color: #111111 !important;
+}
+
+.invoice-preview .text-blue-600 {
+  color: #2563eb !important;
+}
+
+.invoice-preview .text-gray-600 {
+  color: #6b7280 !important;
+}
+
+.invoice-preview .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+.invoice-preview .border-gray-300 {
+  border-color: #d1d5db !important;
+}
+
+.invoice-preview .bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+/* Responsive Text Sizes */
+@media (max-width: 640px) {
+  body {
+    font-size: 12px;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+  }
+  
+  h3 {
+    font-size: 1rem;
+  }
+}
+
+/* Better Form Spacing */
+.space-y-4 > * + * {
+  margin-top: 0.75rem;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.5rem;
+}
+
+/* Improved Dark Mode Contrast */
+.dark .bg-white {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark .text-black {
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.dark .border-gray-300 {
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .text-gray-600 {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .text-gray-500 {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Responsive Tables */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table {
+    min-width: 600px;
+  }
+  
+  th, td {
+    padding: 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Shrinking Save Animation */
+@keyframes shrink {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.save-animation {
+  animation: shrink 0.3s ease-in-out;
+}
+
+/* Better Mobile Touch Targets */
+@media (max-width: 768px) {
+  button {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  input, textarea, select {
+    min-height: 44px;
+    padding: 0.75rem;
+    font-size: 16px; /* Prevents zoom on iOS */
   }
 }
