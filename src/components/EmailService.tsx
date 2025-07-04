@@ -8,8 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Send, Clock, Bell, Users } from 'lucide-react';
+import { Mail, Send, Clock, Bell, Users, HelpCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Link } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 
 const EmailService = () => {
@@ -166,9 +167,17 @@ ${emailSettings.fromEmail}`
 
   return (
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-        <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
-        <h1 className="text-2xl sm:text-3xl font-bold">Email Service</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+          <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold">Email Service</h1>
+        </div>
+        <Link to="/email-setup">
+          <Button variant="outline" size="sm">
+            <HelpCircle className="h-4 w-4 mr-2" />
+            Setup Guide
+          </Button>
+        </Link>
       </div>
 
       {/* Email Settings Configuration */}
@@ -177,63 +186,82 @@ ${emailSettings.fromEmail}`
           <CardTitle className="text-lg sm:text-xl">Email Configuration</CardTitle>
         </CardHeader>
         <CardContent>
-          <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="w-full sm:w-auto">
-                Configure EmailJS Settings
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="w-[95vw] max-w-md sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>EmailJS Configuration</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                <div>
-                  <Label>Service ID</Label>
-                  <Input
-                    value={emailSettings.serviceId}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, serviceId: e.target.value }))}
-                    placeholder="Your EmailJS Service ID"
-                  />
-                </div>
-                <div>
-                  <Label>Template ID</Label>
-                  <Input
-                    value={emailSettings.templateId}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, templateId: e.target.value }))}
-                    placeholder="Your EmailJS Template ID"
-                  />
-                </div>
-                <div>
-                  <Label>Public Key</Label>
-                  <Input
-                    value={emailSettings.publicKey}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, publicKey: e.target.value }))}
-                    placeholder="Your EmailJS Public Key"
-                  />
-                </div>
-                <div>
-                  <Label>From Email</Label>
-                  <Input
-                    value={emailSettings.fromEmail}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, fromEmail: e.target.value }))}
-                    placeholder="your-email@example.com"
-                  />
-                </div>
-                <div>
-                  <Label>From Name</Label>
-                  <Input
-                    value={emailSettings.fromName}
-                    onChange={(e) => setEmailSettings(prev => ({ ...prev, fromName: e.target.value }))}
-                    placeholder="Your Business Name"
-                  />
-                </div>
-                <Button onClick={saveEmailSettings} className="w-full">
-                  Save Settings
+          <div className="space-y-4">
+            <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Configure EmailJS Settings
                 </Button>
+              </DialogTrigger>
+              <DialogContent className="w-[95vw] max-w-md sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>EmailJS Configuration</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                  <div>
+                    <Label>Service ID</Label>
+                    <Input
+                      value={emailSettings.serviceId}
+                      onChange={(e) => setEmailSettings(prev => ({ ...prev, serviceId: e.target.value }))}
+                      placeholder="Your EmailJS Service ID"
+                    />
+                  </div>
+                  <div>
+                    <Label>Template ID</Label>
+                    <Input
+                      value={emailSettings.templateId}
+                      onChange={(e) => setEmailSettings(prev => ({ ...prev, templateId: e.target.value }))}
+                      placeholder="Your EmailJS Template ID"
+                    />
+                  </div>
+                  <div>
+                    <Label>Public Key</Label>
+                    <Input
+                      value={emailSettings.publicKey}
+                      onChange={(e) => setEmailSettings(prev => ({ ...prev, publicKey: e.target.value }))}
+                      placeholder="Your EmailJS Public Key"
+                    />
+                  </div>
+                  <div>
+                    <Label>From Email</Label>
+                    <Input
+                      value={emailSettings.fromEmail}
+                      onChange={(e) => setEmailSettings(prev => ({ ...prev, fromEmail: e.target.value }))}
+                      placeholder="your-email@example.com"
+                    />
+                  </div>
+                  <div>
+                    <Label>From Name</Label>
+                    <Input
+                      value={emailSettings.fromName}
+                      onChange={(e) => setEmailSettings(prev => ({ ...prev, fromName: e.target.value }))}
+                      placeholder="Your Business Name"
+                    />
+                  </div>
+                  <Button onClick={saveEmailSettings} className="w-full">
+                    Save Settings
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            {(!emailSettings.serviceId || !emailSettings.templateId || !emailSettings.publicKey) && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm text-yellow-800">
+                  📧 To send real emails, please configure your EmailJS settings first. 
+                  <Link to="/email-setup" className="underline ml-1">View setup guide →</Link>
+                </p>
               </div>
-            </DialogContent>
-          </Dialog>
+            )}
+            
+            {emailSettings.serviceId && emailSettings.templateId && emailSettings.publicKey && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm text-green-800">
+                  ✅ EmailJS is configured! You can now send real emails.
+                </p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

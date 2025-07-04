@@ -23,6 +23,7 @@ import IntegrationsPage from "@/components/IntegrationsPage";
 import EnhancedSettings from "@/components/EnhancedSettings";
 import NotFound from "@/pages/NotFound";
 import BankAccounts from "@/components/BankAccounts";
+import EmailJSSetup from "@/components/EmailJSSetup";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
                   <Route path="/payments" element={<PaymentTracking />} />
                   <Route path="/payment-initiation" element={<PaymentInitiation />} />
                   <Route path="/email-service" element={<EmailService />} />
+                  <Route path="/email-setup" element={<EmailJSSetup />} />
                   <Route path="/company" element={<CompanySettings />} />
                   <Route path="/integrations" element={<IntegrationsPage />} />
                   <Route path="/settings" element={<EnhancedSettings />} />
