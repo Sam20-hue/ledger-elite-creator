@@ -10,14 +10,14 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Send, Clock, Bell, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import emailjs from '@emailjs/browser';
 
 const EmailService = () => {
   const { toast } = useToast();
   const [emailSettings, setEmailSettings] = useState({
-    smtpHost: 'smtp.gmail.com',
-    smtpPort: '587',
-    smtpUsername: 'samsonakula3@gmail.com',
-    smtpPassword: '',
+    serviceId: '',
+    templateId: '',
+    publicKey: '',
     fromEmail: 'samsonakula3@gmail.com',
     fromName: 'Ledger Elite Creator',
     autoReminders: false,
@@ -26,6 +26,7 @@ const EmailService = () => {
 
   const [reminderEmailOpen, setReminderEmailOpen] = useState(false);
   const [clientEmailOpen, setClientEmailOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [reminderEmail, setReminderEmail] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
@@ -41,25 +42,40 @@ const EmailService = () => {
       return;
     }
 
+    if (!emailSettings.serviceId || !emailSettings.templateId || !emailSettings.publicKey) {
+      toast({
+        title: "Email Service Not Configured",
+        description: "Please configure EmailJS settings first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const reminderBody = `
-        Dear Valued Client,
+      const templateParams = {
+        to_email: reminderEmail,
+        from_name: emailSettings.fromName,
+        from_email: emailSettings.fromEmail,
+        subject: 'Payment Reminder',
+        message: `Dear Valued Client,
         
-        This is a friendly reminder that you have an outstanding payment due.
-        
-        Please process your payment at your earliest convenience.
-        
-        If you have any questions, please don't hesitate to contact us.
-        
-        Best regards,
-        Ledger Elite Creator Team
-        samsonakula3@gmail.com
-      `;
-      
-      console.log('Sending payment reminder to:', reminderEmail);
-      console.log('Reminder body:', reminderBody);
-      
-      await new Promise(resolve => setTimeout(resolve, 2000));
+This is a friendly reminder that you have an outstanding payment due.
+
+Please process your payment at your earliest convenience.
+
+If you have any questions, please don't hesitate to contact us.
+
+Best regards,
+${emailSettings.fromName}
+${emailSettings.fromEmail}`
+      };
+
+      await emailjs.send(
+        emailSettings.serviceId,
+        emailSettings.templateId,
+        templateParams,
+        emailSettings.publicKey
+      );
       
       toast({
         title: "Payment Reminder Sent",
@@ -69,6 +85,7 @@ const EmailService = () => {
       setReminderEmailOpen(false);
       setReminderEmail('');
     } catch (error) {
+      console.error('Email sending error:', error);
       toast({
         title: "Email Failed",
         description: "Failed to send payment reminder. Please check your settings.",
@@ -87,22 +104,30 @@ const EmailService = () => {
       return;
     }
 
+    if (!emailSettings.serviceId || !emailSettings.templateId || !emailSettings.publicKey) {
+      toast({
+        title: "Email Service Not Configured",
+        description: "Please configure EmailJS settings first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const emailBody = `
-        Dear Client,
-        
-        ${emailMessage}
-        
-        Best regards,
-        Ledger Elite Creator Team
-        samsonakula3@gmail.com
-      `;
-      
-      console.log('Sending email to:', clientEmail);
-      console.log('Subject:', emailSubject);
-      console.log('Email body:', emailBody);
-      
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const templateParams = {
+        to_email: clientEmail,
+        from_name: emailSettings.fromName,
+        from_email: emailSettings.fromEmail,
+        subject: emailSubject,
+        message: emailMessage
+      };
+
+      await emailjs.send(
+        emailSettings.serviceId,
+        emailSettings.templateId,
+        templateParams,
+        emailSettings.publicKey
+      );
       
       toast({
         title: "Email Sent Successfully",
@@ -114,6 +139,7 @@ const EmailService = () => {
       setEmailSubject('');
       setEmailMessage('');
     } catch (error) {
+      console.error('Email sending error:', error);
       toast({
         title: "Email Failed",
         description: "Failed to send email. Please check your settings.",
@@ -122,18 +148,100 @@ const EmailService = () => {
     }
   };
 
+  const saveEmailSettings = () => {
+    localStorage.setItem('emailSettings', JSON.stringify(emailSettings));
+    toast({
+      title: "Settings Saved",
+      description: "Email settings have been saved successfully",
+    });
+    setSettingsOpen(false);
+  };
+
+  React.useEffect(() => {
+    const savedSettings = localStorage.getItem('emailSettings');
+    if (savedSettings) {
+      setEmailSettings(JSON.parse(savedSettings));
+    }
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-3">
-        <Mail className="h-8 w-8 text-blue-600" />
-        <h1 className="text-3xl font-bold">Email Service</h1>
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+        <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+        <h1 className="text-2xl sm:text-3xl font-bold">Email Service</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Email Settings Configuration */}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-lg sm:text-xl">Email Configuration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full sm:w-auto">
+                Configure EmailJS Settings
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-[95vw] max-w-md sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>EmailJS Configuration</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                <div>
+                  <Label>Service ID</Label>
+                  <Input
+                    value={emailSettings.serviceId}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, serviceId: e.target.value }))}
+                    placeholder="Your EmailJS Service ID"
+                  />
+                </div>
+                <div>
+                  <Label>Template ID</Label>
+                  <Input
+                    value={emailSettings.templateId}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, templateId: e.target.value }))}
+                    placeholder="Your EmailJS Template ID"
+                  />
+                </div>
+                <div>
+                  <Label>Public Key</Label>
+                  <Input
+                    value={emailSettings.publicKey}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, publicKey: e.target.value }))}
+                    placeholder="Your EmailJS Public Key"
+                  />
+                </div>
+                <div>
+                  <Label>From Email</Label>
+                  <Input
+                    value={emailSettings.fromEmail}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, fromEmail: e.target.value }))}
+                    placeholder="your-email@example.com"
+                  />
+                </div>
+                <div>
+                  <Label>From Name</Label>
+                  <Input
+                    value={emailSettings.fromName}
+                    onChange={(e) => setEmailSettings(prev => ({ ...prev, fromName: e.target.value }))}
+                    placeholder="Your Business Name"
+                  />
+                </div>
+                <Button onClick={saveEmailSettings} className="w-full">
+                  Save Settings
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Bell className="h-5 w-5" />
+            <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>Payment Reminders</span>
             </CardTitle>
           </CardHeader>
@@ -145,7 +253,7 @@ const EmailService = () => {
                   Send Payment Reminder
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="w-[95vw] max-w-md sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Send Payment Reminder</DialogTitle>
                 </DialogHeader>
@@ -156,6 +264,7 @@ const EmailService = () => {
                       value={reminderEmail}
                       onChange={(e) => setReminderEmail(e.target.value)}
                       placeholder="client@example.com"
+                      type="email"
                     />
                   </div>
                   <Button onClick={sendPaymentReminder} className="w-full">
@@ -169,8 +278,8 @@ const EmailService = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Users className="h-5 w-5" />
+            <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>Client Communication</span>
             </CardTitle>
           </CardHeader>
@@ -182,17 +291,18 @@ const EmailService = () => {
                   Send Email to Client
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="w-[95vw] max-w-md sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Send Email to Client</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                   <div>
                     <Label>Client Email</Label>
                     <Input
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
                       placeholder="client@example.com"
+                      type="email"
                     />
                   </div>
                   <div>
@@ -224,14 +334,14 @@ const EmailService = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Clock className="h-5 w-5" />
+          <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Auto Reminder Settings</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label>Enable Auto Reminders</Label>
+            <Label className="text-sm sm:text-base">Enable Auto Reminders</Label>
             <Switch
               checked={emailSettings.autoReminders}
               onCheckedChange={(checked) => 
@@ -239,15 +349,15 @@ const EmailService = () => {
               }
             />
           </div>
-          <div>
-            <Label>Reminder Interval (days)</Label>
+          <div className="space-y-2">
+            <Label className="text-sm sm:text-base">Reminder Interval (days)</Label>
             <Select 
               value={emailSettings.reminderInterval.toString()} 
               onValueChange={(value) => 
                 setEmailSettings(prev => ({ ...prev, reminderInterval: parseInt(value) }))
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
