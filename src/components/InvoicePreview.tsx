@@ -1,12 +1,12 @@
-
 import React, { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useInvoice } from '@/contexts/InvoiceContext';
-import { Download, ArrowLeft, Edit } from 'lucide-react';
+import { Download, ArrowLeft, Edit, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { generateWordDocument } from '@/utils/wordGenerator';
 
 const InvoicePreview = () => {
   const { id } = useParams();
@@ -26,6 +26,21 @@ const InvoicePreview = () => {
     );
   }
 
+  const selectedFields = invoice.selectedFields || {
+    company: {
+      logo: true, name: true, address: true, city: true, zipCode: true, 
+      country: true, phone: true, email: true, website: true, taxId: true,
+    },
+    client: {
+      name: true, address: true, city: true, zipCode: true, 
+      country: true, email: true, phone: true,
+    },
+    invoice: {
+      invoiceNumber: true, issueDate: true, dueDate: true, 
+      notes: true, currency: true, taxRate: true,
+    },
+  };
+
   const downloadPDF = async () => {
     if (!invoiceRef.current) return;
 
@@ -37,7 +52,6 @@ const InvoicePreview = () => {
     
     const imgData = canvas.toDataURL('image/png');
     
-    // A4 format: 210mm x 297mm
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -65,6 +79,10 @@ const InvoicePreview = () => {
     pdf.save(`${invoice.invoiceNumber}.pdf`);
   };
 
+  const downloadWord = () => {
+    generateWordDocument(invoice, company, selectedFields);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-3 p-2 sm:p-4 lg:space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -85,6 +103,10 @@ const InvoicePreview = () => {
             <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             Download PDF
           </Button>
+          <Button onClick={downloadWord} variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
+            <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            Download Word
+          </Button>
         </div>
       </div>
 
@@ -104,34 +126,47 @@ const InvoicePreview = () => {
             {/* Header */}
             <div className="flex flex-col lg:flex-row justify-between items-start mb-6 lg:mb-8 gap-4">
               <div className="flex-1">
-                {company.logo && (
+                {selectedFields.company.logo && company.logo && (
                   <img 
                     src={company.logo} 
                     alt="Company Logo" 
                     className="h-12 sm:h-14 lg:h-16 mb-3 lg:mb-4 object-contain" 
                   />
                 )}
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-2">
-                  {company.name}
-                </h1>
+                {selectedFields.company.name && (
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-2">
+                    {company.name}
+                  </h1>
+                )}
                 <div className="text-xs sm:text-sm text-gray-600 space-y-1">
-                  <p>{company.address}</p>
-                  <p>{company.city}, {company.zipCode}</p>
-                  <p>{company.country}</p>
+                  {selectedFields.company.address && company.address && <p>{company.address}</p>}
+                  {(selectedFields.company.city && company.city) && (
+                    <p>
+                      {company.city}
+                      {selectedFields.company.zipCode && company.zipCode && `, ${company.zipCode}`}
+                    </p>
+                  )}
+                  {selectedFields.company.country && company.country && <p>{company.country}</p>}
                   <div className="mt-2 space-y-1">
-                    <p>Phone: {company.phone}</p>
-                    <p>Email: {company.email}</p>
-                    <p>Website: {company.website}</p>
-                    {company.taxId && <p>Tax ID: {company.taxId}</p>}
+                    {selectedFields.company.phone && company.phone && <p>Phone: {company.phone}</p>}
+                    {selectedFields.company.email && company.email && <p>Email: {company.email}</p>}
+                    {selectedFields.company.website && company.website && <p>Website: {company.website}</p>}
+                    {selectedFields.company.taxId && company.taxId && <p>Tax ID: {company.taxId}</p>}
                   </div>
                 </div>
               </div>
               <div className="text-left lg:text-right w-full lg:w-auto">
                 <h2 className="text-xl sm:text-2xl font-bold mb-2">INVOICE</h2>
-                <p className="text-base sm:text-lg font-semibold mb-3">{invoice.invoiceNumber}</p>
+                {selectedFields.invoice.invoiceNumber && (
+                  <p className="text-base sm:text-lg font-semibold mb-3">{invoice.invoiceNumber}</p>
+                )}
                 <div className="text-xs sm:text-sm text-gray-600 space-y-1">
-                  <p><strong>Issue Date:</strong> {new Date(invoice.issueDate).toLocaleDateString()}</p>
-                  <p><strong>Due Date:</strong> {new Date(invoice.dueDate).toLocaleDateString()}</p>
+                  {selectedFields.invoice.issueDate && (
+                    <p><strong>Issue Date:</strong> {new Date(invoice.issueDate).toLocaleDateString()}</p>
+                  )}
+                  {selectedFields.invoice.dueDate && (
+                    <p><strong>Due Date:</strong> {new Date(invoice.dueDate).toLocaleDateString()}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -140,13 +175,18 @@ const InvoicePreview = () => {
             <div className="mb-6 lg:mb-8">
               <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-2">Bill To:</h3>
               <div className="text-xs sm:text-sm space-y-1">
-                <p className="font-semibold">{invoice.client.name}</p>
-                <p>{invoice.client.address}</p>
-                <p>{invoice.client.city}, {invoice.client.zipCode}</p>
-                <p>{invoice.client.country}</p>
+                {selectedFields.client.name && <p className="font-semibold">{invoice.client.name}</p>}
+                {selectedFields.client.address && invoice.client.address && <p>{invoice.client.address}</p>}
+                {(selectedFields.client.city && invoice.client.city) && (
+                  <p>
+                    {invoice.client.city}
+                    {selectedFields.client.zipCode && invoice.client.zipCode && `, ${invoice.client.zipCode}`}
+                  </p>
+                )}
+                {selectedFields.client.country && invoice.client.country && <p>{invoice.client.country}</p>}
                 <div className="mt-2 space-y-1">
-                  <p>Email: {invoice.client.email}</p>
-                  <p>Phone: {invoice.client.phone}</p>
+                  {selectedFields.client.email && invoice.client.email && <p>Email: {invoice.client.email}</p>}
+                  {selectedFields.client.phone && invoice.client.phone && <p>Phone: {invoice.client.phone}</p>}
                 </div>
               </div>
             </div>
@@ -182,10 +222,12 @@ const InvoicePreview = () => {
                   <span>Subtotal:</span>
                   <span>${Number(invoice.subtotal).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between py-1 sm:py-2">
-                  <span>Tax ({Number(invoice.taxRate)}%):</span>
-                  <span>${Number(invoice.tax).toFixed(2)}</span>
-                </div>
+                {selectedFields.invoice.taxRate && (
+                  <div className="flex justify-between py-1 sm:py-2">
+                    <span>Tax ({Number(invoice.taxRate)}%):</span>
+                    <span>${Number(invoice.tax).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="border-t-2 border-gray-300 flex justify-between py-2 font-bold text-sm sm:text-base lg:text-lg">
                   <span>Total:</span>
                   <span>${Number(invoice.total).toFixed(2)}</span>
@@ -194,7 +236,7 @@ const InvoicePreview = () => {
             </div>
 
             {/* Notes */}
-            {invoice.notes && (
+            {selectedFields.invoice.notes && invoice.notes && (
               <div className="mb-6 lg:mb-8">
                 <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-2">Notes:</h3>
                 <p className="text-xs sm:text-sm text-gray-600 whitespace-pre-wrap break-words">{invoice.notes}</p>

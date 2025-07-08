@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import { Invoice, InvoiceItem } from '@/types/invoice';
 import { Plus, Trash2, Save, Send, Mail } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import InvoiceFieldSelector from './InvoiceFieldSelector';
 
 interface InvoiceFormData {
   clientId: string;
@@ -44,6 +44,37 @@ const InvoiceForm = () => {
   const { clients, invoices, addInvoice, updateInvoice, getNextInvoiceNumber } = useInvoice();
   const [isEditing, setIsEditing] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
+  const [selectedFields, setSelectedFields] = useState({
+    company: {
+      logo: true,
+      name: true,
+      address: true,
+      city: true,
+      zipCode: true,
+      country: true,
+      phone: true,
+      email: true,
+      website: true,
+      taxId: true,
+    },
+    client: {
+      name: true,
+      address: true,
+      city: true,
+      zipCode: true,
+      country: true,
+      email: true,
+      phone: true,
+    },
+    invoice: {
+      invoiceNumber: true,
+      issueDate: true,
+      dueDate: true,
+      notes: true,
+      currency: true,
+      taxRate: true,
+    },
+  });
 
   const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<InvoiceFormData>({
     defaultValues: {
@@ -123,6 +154,16 @@ const InvoiceForm = () => {
     }
   };
 
+  const handleFieldChange = (section: string, field: string, checked: boolean) => {
+    setSelectedFields(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section as keyof typeof prev],
+        [field]: checked,
+      },
+    }));
+  };
+
   const onSubmit = async (data: InvoiceFormData) => {
     const selectedClient = clients.find(client => client.id === data.clientId);
     if (!selectedClient) {
@@ -152,7 +193,8 @@ const InvoiceForm = () => {
       status: 'draft',
       notes: data.notes,
       createdAt: isEditing ? invoices.find(inv => inv.id === id)!.createdAt : new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      selectedFields, // Store field selections
     };
 
     if (isEditing) {
@@ -207,20 +249,26 @@ const InvoiceForm = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
           {isEditing ? 'Edit Invoice' : 'Create New Invoice'}
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+        {/* Field Selection */}
+        <InvoiceFieldSelector
+          selectedFields={selectedFields}
+          onFieldChange={handleFieldChange}
+        />
+
         {/* Invoice Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Invoice Details</CardTitle>
+            <CardTitle className="text-sm sm:text-base">Invoice Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="client">Client *</Label>

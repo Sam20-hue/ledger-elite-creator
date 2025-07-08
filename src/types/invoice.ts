@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   name: string;
@@ -40,6 +39,11 @@ export interface Invoice {
   updatedAt: string;
   buyingTotal?: number;
   profit?: number;
+  selectedFields?: {
+    company: Record<string, boolean>;
+    client: Record<string, boolean>;
+    invoice: Record<string, boolean>;
+  };
 }
 
 export interface Company {
