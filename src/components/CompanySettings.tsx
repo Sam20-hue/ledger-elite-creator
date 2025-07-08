@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useInvoice } from '@/contexts/InvoiceContext';
 import { useForm } from 'react-hook-form';
 import { Company } from '@/types/invoice';
-import { Upload, Save, Building2 } from 'lucide-react';
+import { Upload, Save, Building2, X, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const CompanySettings = () => {
@@ -33,6 +33,15 @@ const CompanySettings = () => {
     }
   };
 
+  const handleRemoveLogo = () => {
+    setLogoPreview('');
+    setValue('logo', '');
+    toast({
+      title: "Logo Removed",
+      description: "Company logo has been removed",
+    });
+  };
+
   const onSubmit = (data: Company) => {
     updateCompany(data);
     toast({
@@ -55,19 +64,47 @@ const CompanySettings = () => {
             <CardTitle>Company Logo</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center space-x-4">
-              {logoPreview && (
-                <div className="w-24 h-24 border rounded-lg overflow-hidden">
-                  <img src={logoPreview} alt="Company Logo" className="w-full h-full object-contain" />
+            <div className="flex items-start space-x-4">
+              {logoPreview ? (
+                <div className="relative group">
+                  <div className="w-24 h-24 border rounded-lg overflow-hidden bg-gray-50">
+                    <img src={logoPreview} alt="Company Logo" className="w-full h-full object-contain" />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={handleRemoveLogo}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                  <Upload className="h-8 w-8 text-gray-400" />
                 </div>
               )}
-              <div>
-                <Label htmlFor="logo" className="cursor-pointer">
-                  <div className="flex items-center space-x-2 px-4 py-2 border rounded-md hover:bg-gray-50">
-                    <Upload className="h-4 w-4" />
-                    <span>Upload Logo</span>
-                  </div>
-                </Label>
+              <div className="flex-1 space-y-2">
+                <div className="flex gap-2">
+                  <Label htmlFor="logo" className="cursor-pointer flex-1">
+                    <div className="flex items-center justify-center space-x-2 px-4 py-2 border rounded-md hover:bg-gray-50 transition-colors">
+                      {logoPreview ? <Edit className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                      <span>{logoPreview ? 'Change Logo' : 'Upload Logo'}</span>
+                    </div>
+                  </Label>
+                  {logoPreview && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveLogo}
+                      className="px-3"
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
                 <Input
                   id="logo"
                   type="file"
@@ -75,8 +112,8 @@ const CompanySettings = () => {
                   onChange={handleLogoUpload}
                   className="hidden"
                 />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Recommended: 200x100px or similar ratio
+                <p className="text-sm text-muted-foreground">
+                  Recommended: 200x100px or similar ratio. Accepts JPG, PNG, SVG.
                 </p>
               </div>
             </div>
