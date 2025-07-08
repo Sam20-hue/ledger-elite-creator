@@ -7,6 +7,7 @@ import { Download, ArrowLeft, Edit, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { generateWordDocument } from '@/utils/wordGenerator';
+import { formatDateToDDMMYYYY } from '@/utils/dateUtils';
 
 const InvoicePreview = () => {
   const { id } = useParams();
@@ -162,10 +163,10 @@ const InvoicePreview = () => {
                 )}
                 <div className="text-xs sm:text-sm text-gray-600 space-y-1">
                   {selectedFields.invoice.issueDate && (
-                    <p><strong>Issue Date:</strong> {new Date(invoice.issueDate).toLocaleDateString()}</p>
+                    <p><strong>Issue Date:</strong> {formatDateToDDMMYYYY(invoice.issueDate)}</p>
                   )}
                   {selectedFields.invoice.dueDate && (
-                    <p><strong>Due Date:</strong> {new Date(invoice.dueDate).toLocaleDateString()}</p>
+                    <p><strong>Due Date:</strong> {formatDateToDDMMYYYY(invoice.dueDate)}</p>
                   )}
                 </div>
               </div>

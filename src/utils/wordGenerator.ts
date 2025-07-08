@@ -1,6 +1,7 @@
 
 import { Invoice } from '@/types/invoice';
 import { Company } from '@/types/invoice';
+import { formatDateToDDMMYYYY } from '@/utils/dateUtils';
 
 interface SelectedFields {
   company: Record<string, boolean>;
@@ -82,10 +83,10 @@ export const generateWordDocument = (
     htmlContent += `<div style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">${invoice.invoiceNumber}</div>`;
   }
   if (selectedFields.invoice.issueDate) {
-    htmlContent += `<div><strong>Issue Date:</strong> ${new Date(invoice.issueDate).toLocaleDateString()}</div>`;
+    htmlContent += `<div><strong>Issue Date:</strong> ${formatDateToDDMMYYYY(invoice.issueDate)}</div>`;
   }
   if (selectedFields.invoice.dueDate) {
-    htmlContent += `<div><strong>Due Date:</strong> ${new Date(invoice.dueDate).toLocaleDateString()}</div>`;
+    htmlContent += `<div><strong>Due Date:</strong> ${formatDateToDDMMYYYY(invoice.dueDate)}</div>`;
   }
 
   htmlContent += `
