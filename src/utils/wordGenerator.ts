@@ -1,4 +1,3 @@
-
 import { Invoice } from '@/types/invoice';
 import { Company } from '@/types/invoice';
 import { formatDateToDDMMYYYY } from '@/utils/dateUtils';
@@ -156,8 +155,10 @@ export const generateWordDocument = (
     htmlContent += `<div class="total-row">Tax (${Number(invoice.taxRate)}%): ${invoice.currency === 'USD' ? '$' : invoice.currency}${Number(invoice.tax).toFixed(2)}</div>`;
   }
 
+  const finalTotal = selectedFields.invoice.taxRate ? Number(invoice.total) : Number(invoice.subtotal);
+  
   htmlContent += `
-        <div class="total-row final-total">Total: ${invoice.currency === 'USD' ? '$' : invoice.currency}${Number(invoice.total).toFixed(2)}</div>
+        <div class="total-row final-total">Total: ${invoice.currency === 'USD' ? '$' : invoice.currency}${finalTotal.toFixed(2)}</div>
       </div>
   `;
 

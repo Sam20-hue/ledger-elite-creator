@@ -231,7 +231,7 @@ const InvoicePreview = () => {
                 )}
                 <div className="border-t-2 border-gray-300 flex justify-between py-2 font-bold text-sm sm:text-base lg:text-lg">
                   <span>Total:</span>
-                  <span>${Number(invoice.total).toFixed(2)}</span>
+                  <span>${selectedFields.invoice.taxRate ? Number(invoice.total).toFixed(2) : Number(invoice.subtotal).toFixed(2)}</span>
                 </div>
               </div>
             </div>
