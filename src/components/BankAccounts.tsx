@@ -309,7 +309,7 @@ const BankAccounts = () => {
                 </p>
               </div>
             </div>
-          </CardCardContent>
+          </CardContent>
         </Card>
       ))}
 
