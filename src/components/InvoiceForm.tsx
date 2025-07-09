@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ interface InvoiceFormData {
   dueDate: string;
   items: InvoiceItem[];
   taxRate: number;
+  discount: number;
   notes: string;
   currency: string;
 }
@@ -83,6 +85,7 @@ const InvoiceForm = () => {
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       items: [{ id: crypto.randomUUID(), description: '', quantity: 1, rate: 0, buyingPrice: 0, amount: 0 }],
       taxRate: 10,
+      discount: 0,
       notes: '',
       currency: 'USD'
     }
@@ -95,6 +98,7 @@ const InvoiceForm = () => {
 
   const watchedItems = watch('items');
   const watchedTaxRate = watch('taxRate');
+  const watchedDiscount = watch('discount');
   const watchedCurrency = watch('currency');
 
   useEffect(() => {
@@ -108,6 +112,7 @@ const InvoiceForm = () => {
           dueDate: invoice.dueDate,
           items: invoice.items,
           taxRate: invoice.taxRate,
+          discount: invoice.discount || 0,
           notes: invoice.notes,
           currency: invoice.currency || 'USD'
         });
@@ -126,7 +131,8 @@ const InvoiceForm = () => {
   const subtotal = watchedItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
   const buyingTotal = watchedItems.reduce((sum, item) => sum + (item.quantity * (item.buyingPrice || 0)), 0);
   const tax = subtotal * (watchedTaxRate / 100);
-  const total = subtotal + tax;
+  const discount = watchedDiscount || 0;
+  const total = subtotal + tax - discount;
   const profit = total - buyingTotal - tax;
 
   const getCurrencySymbol = (currencyCode: string) => {
@@ -186,6 +192,7 @@ const InvoiceForm = () => {
       subtotal,
       tax,
       taxRate: data.taxRate,
+      discount: data.discount,
       total,
       currency: data.currency,
       buyingTotal,
@@ -230,6 +237,7 @@ const InvoiceForm = () => {
         subtotal,
         tax,
         taxRate: data.taxRate,
+        discount: data.discount,
         total,
         currency: data.currency,
         buyingTotal,
@@ -428,6 +436,19 @@ const InvoiceForm = () => {
                       <span>%</span>
                     </div>
                     <span>{getCurrencySymbol(watchedCurrency)}{tax.toFixed(2)}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <span>Discount:</span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        className="w-20 h-6 text-xs"
+                        {...register('discount', { min: 0 })}
+                      />
+                    </div>
+                    <span>{getCurrencySymbol(watchedCurrency)}{discount.toFixed(2)}</span>
                   </div>
                   
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
