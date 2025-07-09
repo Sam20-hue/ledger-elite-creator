@@ -160,6 +160,45 @@
   color: hsl(var(--muted-foreground)) !important;
 }
 
+/* Dark Mode Visibility Fixes */
+.dark .text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .bg-muted {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.dark .hover\:bg-muted\/50:hover {
+  background-color: hsl(var(--muted) / 0.5) !important;
+}
+
+/* Ensure text is visible in dark mode */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.dark p,
+.dark span,
+.dark div,
+.dark label {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .text-red-600 {
+  color: hsl(0 84.2% 60.2%) !important;
+}
+
+.dark .text-green-600 {
+  color: hsl(142.1 76.2% 36.3%) !important;
+}
+
+.dark .text-blue-600 {
+  color: hsl(var(--primary)) !important;
+}
+
 /* Responsive Tables */
 @media (max-width: 768px) {
   .table-responsive {

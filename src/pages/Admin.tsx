@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Users, Plus, Trash2, UserCheck, Settings } from 'lucide-react';
 
 interface User {
@@ -17,6 +18,7 @@ interface User {
   createdAt: string;
   permissions: string[];
   role: 'admin' | 'sub-admin' | 'user' | 'finance';
+  financePassword?: string;
 }
 
 const availablePages = [
@@ -51,19 +53,28 @@ const Admin = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [passwordStrength, setPasswordStrength] = useState<{ isStrong: boolean; message: string; }>({ isStrong: false, message: '' });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
+    financePassword: '',
     permissions: [] as string[],
     role: 'user' as 'admin' | 'sub-admin' | 'user' | 'finance'
   });
   const { toast } = useToast();
+  const { checkPasswordStrength } = useAuth();
 
   useEffect(() => {
     const savedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     setUsers(savedUsers);
   }, []);
+
+  const handlePasswordChange = (password: string) => {
+    setFormData(prev => ({ ...prev, password }));
+    const strength = checkPasswordStrength(password);
+    setPasswordStrength(strength);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +83,24 @@ const Admin = () => {
       toast({
         title: "Error",
         description: "All fields are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!passwordStrength.isStrong) {
+      toast({
+        title: "Weak Password",
+        description: passwordStrength.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (formData.role === 'finance' && !formData.financePassword) {
+      toast({
+        title: "Error",
+        description: "Finance manager password is required for finance role",
         variant: "destructive"
       });
       return;
@@ -103,7 +132,8 @@ const Admin = () => {
       description: "User registered successfully",
     });
 
-    setFormData({ name: '', email: '', password: '', permissions: [], role: 'user' });
+    setFormData({ name: '', email: '', password: '', financePassword: '', permissions: [], role: 'user' });
+    setPasswordStrength({ isStrong: false, message: '' });
     setIsDialogOpen(false);
   };
 
@@ -159,7 +189,7 @@ const Admin = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <UserCheck className="h-8 w-8 text-blue-600" />
+          <UserCheck className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-bold">User Administration</h1>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -169,7 +199,7 @@ const Admin = () => {
               Register New User
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Register New User</DialogTitle>
               <DialogDescription>
@@ -204,10 +234,15 @@ const Admin = () => {
                   id="password"
                   type="password"
                   value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
                   placeholder="Enter password"
                   required
                 />
+                {formData.password && (
+                  <p className={`text-xs mt-1 ${passwordStrength.isStrong ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordStrength.message}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="role">User Role</Label>
@@ -223,9 +258,25 @@ const Admin = () => {
                   </SelectContent>
                 </Select>
               </div>
+              {formData.role === 'finance' && (
+                <div>
+                  <Label htmlFor="financePassword">Finance Manager Password</Label>
+                  <Input
+                    id="financePassword"
+                    type="password"
+                    value={formData.financePassword}
+                    onChange={(e) => setFormData(prev => ({ ...prev, financePassword: e.target.value }))}
+                    placeholder="Enter finance access password"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This password will be required to access payment initiation features
+                  </p>
+                </div>
+              )}
               <div>
                 <Label>Page Permissions</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto">
                   {getFilteredPages(formData.role).map((page) => (
                     <div key={page.id} className="flex items-center space-x-2">
                       <Checkbox
@@ -259,8 +310,8 @@ const Admin = () => {
         <CardContent>
           {users.length === 0 ? (
             <div className="text-center py-8">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">No users registered yet</p>
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-4">No users registered yet</p>
               <Button onClick={() => setIsDialogOpen(true)}>
                 Register First User
               </Button>
@@ -280,20 +331,21 @@ const Admin = () => {
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b hover:bg-gray-50">
+                    <tr key={user.id} className="border-b hover:bg-muted/50">
                       <td className="py-4 px-2 font-medium">{user.name}</td>
                       <td className="py-4 px-2">{user.email}</td>
                       <td className="py-4 px-2">
                         <span className={`px-2 py-1 rounded text-xs ${
                           user.role === 'admin' ? 'bg-red-100 text-red-800' :
                           user.role === 'sub-admin' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
+                          user.role === 'finance' ? 'bg-green-100 text-green-800' :
+                          'bg-muted text-muted-foreground'
                         }`}>
                           {user.role}
                         </span>
                       </td>
                       <td className="py-4 px-2">
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-muted-foreground">
                           {user.permissions?.length || 0} pages
                         </span>
                       </td>
@@ -361,7 +413,7 @@ const Admin = () => {
             </div>
             <div>
               <Label>Page Access Permissions</Label>
-              <div className="grid grid-cols-2 gap-3 mt-3">
+              <div className="grid grid-cols-2 gap-3 mt-3 max-h-60 overflow-y-auto">
                 {getFilteredPages(selectedUser?.role || 'user').map((page) => (
                   <div key={page.id} className="flex items-center space-x-2">
                     <Checkbox

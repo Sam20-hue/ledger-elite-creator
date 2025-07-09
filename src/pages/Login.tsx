@@ -41,11 +41,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <LogIn className="h-12 w-12 text-blue-600" />
+            <LogIn className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome to Numera</CardTitle>
           <CardDescription>Sign in to your account to continue</CardDescription>
@@ -78,7 +78,7 @@ const Login = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-gray-600">
+          <div className="mt-4 text-center text-sm text-muted-foreground">
             <p>Demo credentials:</p>
             <p>Admin password: 1029384756</p>
           </div>
