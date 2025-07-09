@@ -21,6 +21,20 @@ import {
   UserCog,
   Briefcase
 } from 'lucide-react';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { isLoggedIn, userRole, currentUser, logout } = useAuth();
@@ -88,88 +102,122 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Admin Panel', href: '/admin', icon: UserCog },
   ];
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <Link to="/" className="text-2xl font-bold text-primary">
-                Numera
-              </Link>
-              
-              {/* Navigation */}
-              <nav className="hidden md:flex space-x-6">
-                {navigation.map((item) => {
-                  if (item.requiresAuth && !isLoggedIn) return null;
-                  if (item.requiresAuth && !hasAccess(item.permission)) return null;
-                  
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        location.pathname === item.href
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.name}</span>
-                    </Link>
-                  );
-                })}
+  const AppSidebar = () => (
+    <Sidebar className="w-64 border-r border-border bg-card">
+      <SidebarHeader className="p-4 border-b border-border">
+        <Link to="/" className="text-2xl font-bold text-primary">
+          Numera
+        </Link>
+      </SidebarHeader>
+      
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigation.map((item) => {
+                if (item.requiresAuth && !isLoggedIn) return null;
+                if (item.requiresAuth && !hasAccess(item.permission)) return null;
                 
-                {userRole === 'admin' && adminNavigation.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        location.pathname === item.href
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.name}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <ThemeToggle />
+                const Icon = item.icon;
+                const isActive = location.pathname === item.href;
+                
+                return (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link to={item.href} className="flex items-center gap-3">
+                        <Icon className="h-4 w-4" />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
               
-              {isLoggedIn ? (
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-muted-foreground">
-                    User: <span className="font-medium text-foreground">{getUserName()}</span>
-                  </span>
-                  <Button variant="outline" size="sm" onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </Button>
-                </div>
-              ) : (
-                <Link to="/login">
-                  <Button size="sm">Login</Button>
-                </Link>
-              )}
+              {userRole === 'admin' && adminNavigation.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.href;
+                
+                return (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link to={item.href} className="flex items-center gap-3">
+                        <Icon className="h-4 w-4" />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      
+      <SidebarFooter className="p-4 border-t border-border">
+        <div className="flex items-center justify-between">
+          <ThemeToggle />
+          
+          {isLoggedIn ? (
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-muted-foreground">
+                User: <span className="font-medium text-foreground">{getUserName()}</span>
+              </span>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
-          </div>
+          ) : (
+            <Link to="/login">
+              <Button size="sm">Login</Button>
+            </Link>
+          )}
         </div>
-      </header>
+      </SidebarFooter>
+    </Sidebar>
+  );
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {children}
-      </main>
-    </div>
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        {/* Sidebar */}
+        <AppSidebar />
+        
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="bg-card border-b border-border p-4">
+            <div className="flex items-center justify-between">
+              <SidebarTrigger />
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+                {isLoggedIn ? (
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-muted-foreground">
+                      User: <span className="font-medium text-foreground">{getUserName()}</span>
+                    </span>
+                    <Button variant="outline" size="sm" onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
+                ) : (
+                  <Link to="/login">
+                    <Button size="sm">Login</Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </header>
+          
+          {/* Page Content */}
+          <main className="flex-1 p-6">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
