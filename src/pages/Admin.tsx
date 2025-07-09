@@ -1,147 +1,117 @@
+
 import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Users, Plus, Trash2, UserCheck, Settings } from 'lucide-react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  createdAt: string;
-  permissions: string[];
-  role: 'admin' | 'sub-admin' | 'user' | 'finance';
-  financePassword?: string;
-}
-
-const availablePages = [
-  { id: 'dashboard', name: 'Dashboard' },
-  { id: 'invoices', name: 'Invoices' },
-  { id: 'clients', name: 'Clients' },
-  { id: 'financial-reports', name: 'Accounts/Financial Reports' },
-  { id: 'bank-accounts', name: 'Bank Accounts' },
-  { id: 'payments', name: 'Payments' },
-  { id: 'payment-initiation', name: 'Payment Initiation' },
-  { id: 'email-service', name: 'Email Service' },
-  { id: 'company', name: 'Company Settings' },
-  { id: 'integrations', name: 'Integrations' },
-  { id: 'settings', name: 'Settings' },
-  { id: 'admin', name: 'Admin Panel' }
-];
-
-const getFilteredPages = (role: string) => {
-  if (role === 'user') {
-    return availablePages.filter(page => page.id !== 'admin' && page.id !== 'payment-initiation');
-  }
-  if (role === 'finance') {
-    return availablePages.filter(page => 
-      ['dashboard', 'invoices', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service'].includes(page.id)
-    );
-  }
-  return availablePages;
-};
+import { 
+  Users, 
+  Shield, 
+  AlertTriangle, 
+  Edit, 
+  Trash2, 
+  UserPlus,
+  Download,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock
+} from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import * as XLSX from 'xlsx';
 
 const Admin = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [passwordStrength, setPasswordStrength] = useState<{ isStrong: boolean; message: string; }>({ isStrong: false, message: '' });
-  const [formData, setFormData] = useState({
+  const [users, setUsers] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [userForm, setUserForm] = useState({
     name: '',
     email: '',
     password: '',
-    financePassword: '',
-    permissions: [] as string[],
-    role: 'user' as 'admin' | 'sub-admin' | 'user' | 'finance'
+    role: 'user',
+    permissions: [] as string[]
   });
+  
   const { toast } = useToast();
-  const { checkPasswordStrength } = useAuth();
+  const { resetLoginAttempts } = useAuth();
+
+  const availablePermissions = [
+    'dashboard', 'invoices', 'clients', 'inventory', 'financial-reports', 
+    'bank-accounts', 'payments', 'payment-initiation', 'email-service', 
+    'company', 'integrations', 'settings'
+  ];
 
   useEffect(() => {
-    const savedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    setUsers(savedUsers);
+    loadUsers();
+    loadAlerts();
   }, []);
 
-  const handlePasswordChange = (password: string) => {
-    setFormData(prev => ({ ...prev, password }));
-    const strength = checkPasswordStrength(password);
-    setPasswordStrength(strength);
+  const loadUsers = () => {
+    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    setUsers(registeredUsers);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.password) {
+  const loadAlerts = () => {
+    const adminAlerts = JSON.parse(localStorage.getItem('adminAlerts') || '[]');
+    setAlerts(adminAlerts);
+  };
+
+  const saveUser = () => {
+    if (!userForm.name || !userForm.email || !userForm.password) {
       toast({
         title: "Error",
-        description: "All fields are required",
-        variant: "destructive"
+        description: "Please fill in all required fields",
+        variant: "destructive",
       });
       return;
     }
 
-    if (!passwordStrength.isStrong) {
-      toast({
-        title: "Weak Password",
-        description: passwordStrength.message,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (formData.role === 'finance' && !formData.financePassword) {
-      toast({
-        title: "Error",
-        description: "Finance manager password is required for finance role",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    
-    if (existingUsers.find((u: User) => u.email === formData.email)) {
-      toast({
-        title: "Error",
-        description: "User with this email already exists",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const newUser: User = {
-      id: Date.now().toString(),
-      ...formData,
-      createdAt: new Date().toISOString()
+    const newUser = {
+      id: editingUser?.id || crypto.randomUUID(),
+      ...userForm,
+      createdAt: editingUser?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
-    const updatedUsers = [...existingUsers, newUser];
-    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+    let updatedUsers;
+    if (editingUser) {
+      updatedUsers = users.map(user => user.id === editingUser.id ? newUser : user);
+    } else {
+      // Check if email already exists
+      if (users.find(u => u.email === userForm.email)) {
+        toast({
+          title: "Error",
+          description: "A user with this email already exists",
+          variant: "destructive",
+        });
+        return;
+      }
+      updatedUsers = [...users, newUser];
+    }
+
     setUsers(updatedUsers);
+    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
     toast({
       title: "Success",
-      description: "User registered successfully",
+      description: editingUser ? "User updated successfully" : "User created successfully",
     });
 
-    setFormData({ name: '', email: '', password: '', financePassword: '', permissions: [], role: 'user' });
-    setPasswordStrength({ isStrong: false, message: '' });
-    setIsDialogOpen(false);
+    resetUserForm();
   };
 
-  const handleDelete = (id: string) => {
+  const deleteUser = (userId: string) => {
     if (confirm('Are you sure you want to delete this user?')) {
-      const updatedUsers = users.filter(user => user.id !== id);
-      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      const updatedUsers = users.filter(user => user.id !== userId);
       setUsers(updatedUsers);
+      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
       
       toast({
         title: "Success",
@@ -150,171 +120,235 @@ const Admin = () => {
     }
   };
 
-  const handlePermissionChange = (pageId: string, checked: boolean) => {
-    if (selectedUser) {
-      const currentPermissions = selectedUser.permissions || [];
-      const updatedPermissions = checked 
-        ? [...currentPermissions, pageId]
-        : currentPermissions.filter(p => p !== pageId);
-      
-      setSelectedUser({ ...selectedUser, permissions: updatedPermissions });
+  const unlockUser = (email: string) => {
+    // Reset login attempts for specific user
+    localStorage.removeItem(`loginAttempts_${email}`);
+    localStorage.removeItem(`accountLocked_${email}`);
+    resetLoginAttempts();
+    
+    toast({
+      title: "Success",
+      description: `Account unlocked for ${email}`,
+    });
+  };
+
+  const resetUserForm = () => {
+    setUserForm({
+      name: '',
+      email: '',
+      password: '',
+      role: 'user',
+      permissions: []
+    });
+    setEditingUser(null);
+    setIsUserDialogOpen(false);
+  };
+
+  const editUser = (user: any) => {
+    setUserForm({
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      role: user.role || 'user',
+      permissions: user.permissions || []
+    });
+    setEditingUser(user);
+    setIsUserDialogOpen(true);
+  };
+
+  const handlePermissionChange = (permission: string, checked: boolean) => {
+    if (checked) {
+      setUserForm(prev => ({
+        ...prev,
+        permissions: [...prev.permissions, permission]
+      }));
     } else {
-      const updatedPermissions = checked 
-        ? [...formData.permissions, pageId]
-        : formData.permissions.filter(p => p !== pageId);
-      
-      setFormData({ ...formData, permissions: updatedPermissions });
+      setUserForm(prev => ({
+        ...prev,
+        permissions: prev.permissions.filter(p => p !== permission)
+      }));
     }
   };
 
-  const savePermissions = () => {
-    if (selectedUser) {
-      const updatedUsers = users.map(user => 
-        user.id === selectedUser.id ? selectedUser : user
-      );
-      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
-      setUsers(updatedUsers);
-      
-      toast({
-        title: "Success",
-        description: "Permissions updated successfully",
-      });
-      
-      setIsPermissionDialogOpen(false);
-      setSelectedUser(null);
-    }
+  const exportUsers = () => {
+    const exportData = users.map(user => ({
+      'Name': user.name,
+      'Email': user.email,
+      'Role': user.role,
+      'Permissions': user.permissions?.join(', ') || '',
+      'Created Date': new Date(user.createdAt).toLocaleDateString(),
+      'Last Updated': new Date(user.updatedAt).toLocaleDateString()
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Users');
+    XLSX.writeFile(wb, `users_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+    toast({
+      title: "Success",
+      description: "Users exported successfully",
+    });
+  };
+
+  const clearAlert = (alertId: string) => {
+    const updatedAlerts = alerts.filter(alert => alert.id !== alertId);
+    setAlerts(updatedAlerts);
+    localStorage.setItem('adminAlerts', JSON.stringify(updatedAlerts));
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <UserCheck className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">User Administration</h1>
+          <Shield className="h-8 w-8 text-red-600" />
+          <h1 className="text-3xl font-bold">Admin Panel</h1>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Register New User
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Register New User</DialogTitle>
-              <DialogDescription>
-                Create a new user account with specific permissions and role.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="john@example.com"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => handlePasswordChange(e.target.value)}
-                  placeholder="Enter password"
-                  required
-                />
-                {formData.password && (
-                  <p className={`text-xs mt-1 ${passwordStrength.isStrong ? 'text-green-600' : 'text-red-600'}`}>
-                    {passwordStrength.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="role">User Role</Label>
-                <Select value={formData.role} onValueChange={(value: 'admin' | 'sub-admin' | 'user' | 'finance') => setFormData(prev => ({ ...prev, role: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="user">Regular User</SelectItem>
-                    <SelectItem value="sub-admin">Sub Admin</SelectItem>
-                    <SelectItem value="finance">Finance Manager</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {formData.role === 'finance' && (
-                <div>
-                  <Label htmlFor="financePassword">Finance Manager Password</Label>
-                  <Input
-                    id="financePassword"
-                    type="password"
-                    value={formData.financePassword}
-                    onChange={(e) => setFormData(prev => ({ ...prev, financePassword: e.target.value }))}
-                    placeholder="Enter finance access password"
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This password will be required to access payment initiation features
-                  </p>
+        <div className="flex gap-2">
+          <Button onClick={exportUsers} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Export Users
+          </Button>
+          <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => resetUserForm()}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add User
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Name</Label>
+                    <Input
+                      value={userForm.name}
+                      onChange={(e) => setUserForm(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="John Doe"
+                    />
+                  </div>
+                  <div>
+                    <Label>Email</Label>
+                    <Input
+                      type="email"
+                      value={userForm.email}
+                      onChange={(e) => setUserForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="john@example.com"
+                    />
+                  </div>
                 </div>
-              )}
-              <div>
-                <Label>Page Permissions</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto">
-                  {getFilteredPages(formData.role).map((page) => (
-                    <div key={page.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={page.id}
-                        checked={formData.permissions.includes(page.id)}
-                        onCheckedChange={(checked) => handlePermissionChange(page.id, checked as boolean)}
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Password</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        value={userForm.password}
+                        onChange={(e) => setUserForm(prev => ({ ...prev, password: e.target.value }))}
+                        placeholder="Enter password"
                       />
-                      <Label htmlFor={page.id} className="text-sm">{page.name}</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <Label>Role</Label>
+                    <Select value={userForm.role} onValueChange={(value) => setUserForm(prev => ({ ...prev, role: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="finance">Finance Manager</SelectItem>
+                        <SelectItem value="admin">Administrator</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
+
+                <div>
+                  <Label>Permissions</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {availablePermissions.map(permission => (
+                      <div key={permission} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={permission}
+                          checked={userForm.permissions.includes(permission)}
+                          onCheckedChange={(checked) => handlePermissionChange(permission, !!checked)}
+                        />
+                        <Label htmlFor={permission} className="text-sm capitalize">
+                          {permission.replace('-', ' ')}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Button onClick={saveUser} className="w-full">
+                  {editingUser ? 'Update User' : 'Create User'}
                 </Button>
-                <Button type="submit">
-                  Register User
-                </Button>
               </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
+      {/* Security Alerts */}
+      {alerts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <span>Security Alerts</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {alerts.map((alert) => (
+                <div key={alert.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-red-800">{alert.message}</p>
+                    <p className="text-sm text-red-600">
+                      {new Date(alert.timestamp).toLocaleString()} - {alert.attempts} attempts
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => unlockUser(alert.email)}>
+                      <Unlock className="h-4 w-4 mr-1" />
+                      Unlock
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => clearAlert(alert.id)}>
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Users List */}
       <Card>
         <CardHeader>
-          <CardTitle>Registered Users ({users.length})</CardTitle>
-          <CardDescription>Manage all registered users and their permissions</CardDescription>
+          <CardTitle>User Management ({users.length} users)</CardTitle>
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
             <div className="text-center py-8">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">No users registered yet</p>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                Register First User
-              </Button>
+              <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground">No users found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -331,23 +365,18 @@ const Admin = () => {
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b hover:bg-muted/50">
+                    <tr key={user.id} className="border-b hover:bg-gray-50">
                       <td className="py-4 px-2 font-medium">{user.name}</td>
                       <td className="py-4 px-2">{user.email}</td>
                       <td className="py-4 px-2">
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                          user.role === 'sub-admin' ? 'bg-yellow-100 text-yellow-800' :
-                          user.role === 'finance' ? 'bg-green-100 text-green-800' :
-                          'bg-muted text-muted-foreground'
-                        }`}>
+                        <Badge variant={user.role === 'admin' ? 'destructive' : user.role === 'finance' ? 'default' : 'secondary'}>
                           {user.role}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="py-4 px-2">
-                        <span className="text-sm text-muted-foreground">
-                          {user.permissions?.length || 0} pages
-                        </span>
+                        <div className="text-sm text-muted-foreground">
+                          {user.permissions?.length || 0} permissions
+                        </div>
                       </td>
                       <td className="py-4 px-2">
                         {new Date(user.createdAt).toLocaleDateString()}
@@ -357,21 +386,19 @@ const Admin = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setIsPermissionDialogOpen(true);
-                            }}
+                            onClick={() => editUser(user)}
                           >
-                            <Settings className="h-4 w-4" />
+                            <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDelete(user.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {user.email !== 'amayamusamson@gmail.com' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteUser(user.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -382,61 +409,6 @@ const Admin = () => {
           )}
         </CardContent>
       </Card>
-
-      <Dialog open={isPermissionDialogOpen} onOpenChange={setIsPermissionDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Manage Permissions for {selectedUser?.name}</DialogTitle>
-            <DialogDescription>
-              Configure page access permissions and user role.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>User Role</Label>
-              <Select 
-                value={selectedUser?.role || 'user'} 
-                onValueChange={(value: 'admin' | 'sub-admin' | 'user' | 'finance') => 
-                  selectedUser && setSelectedUser({...selectedUser, role: value})
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Regular User</SelectItem>
-                  <SelectItem value="sub-admin">Sub Admin</SelectItem>
-                  <SelectItem value="finance">Finance Manager</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Page Access Permissions</Label>
-              <div className="grid grid-cols-2 gap-3 mt-3 max-h-60 overflow-y-auto">
-                {getFilteredPages(selectedUser?.role || 'user').map((page) => (
-                  <div key={page.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`permission-${page.id}`}
-                      checked={selectedUser?.permissions?.includes(page.id) || false}
-                      onCheckedChange={(checked) => handlePermissionChange(page.id, checked as boolean)}
-                    />
-                    <Label htmlFor={`permission-${page.id}`}>{page.name}</Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsPermissionDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={savePermissions}>
-                Save Permissions
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

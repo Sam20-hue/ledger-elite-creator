@@ -1,13 +1,15 @@
-
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 
 interface AuthContextType {
   isLoggedIn: boolean;
   userRole: string | null;
   currentUser: string | null;
+  loginAttempts: number;
+  isLocked: boolean;
   logout: () => void;
   login: (email: string, password: string) => boolean;
   checkPasswordStrength: (password: string) => { isStrong: boolean; message: string; };
+  resetLoginAttempts: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,6 +18,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+
+  // Shared data storage functions
+  const updateSharedData = (key: string, data: any) => {
+    localStorage.setItem(key, JSON.stringify(data));
+    // Also store in a global shared key for cross-device access
+    localStorage.setItem(`shared_${key}`, JSON.stringify(data));
+  };
+
+  const getSharedData = (key: string) => {
+    const shared = localStorage.getItem(`shared_${key}`);
+    if (shared) {
+      localStorage.setItem(key, shared);
+      return JSON.parse(shared);
+    }
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  };
 
   // Check password strength
   const checkPasswordStrength = (password: string): { isStrong: boolean; message: string; } => {
@@ -61,16 +81,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    // Check immediately and then every hour
     checkLoginExpiry();
-    const interval = setInterval(checkLoginExpiry, 60 * 60 * 1000); // Check every hour
+    const interval = setInterval(checkLoginExpiry, 60 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    // Create default admin user if not exists
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    // Create default admin user if not exists using shared data
+    const registeredUsers = getSharedData('registeredUsers');
     const adminExists = registeredUsers.find((u: any) => u.email === 'amayamusamson@gmail.com');
     
     if (!adminExists) {
@@ -80,11 +99,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: 'amayamusamson@gmail.com',
         password: '1029384756',
         createdAt: new Date().toISOString(),
-        permissions: ['dashboard', 'invoices', 'clients', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service', 'company', 'integrations', 'settings', 'admin'],
+        permissions: ['dashboard', 'invoices', 'clients', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service', 'company', 'integrations', 'settings', 'admin', 'inventory'],
         role: 'admin'
       };
       registeredUsers.push(adminUser);
-      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+      updateSharedData('registeredUsers', registeredUsers);
     }
 
     const loggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
@@ -92,7 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const user = sessionStorage.getItem('currentUser');
     
     if (loggedIn && user) {
-      const currentUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const currentUsers = getSharedData('registeredUsers');
       const userExists = currentUsers.find((u: any) => u.email === user);
       
       if (!userExists) {
@@ -104,13 +123,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoggedIn(loggedIn);
     setUserRole(role);
     setCurrentUser(user);
+
+    // Check if account is locked
+    const attempts = parseInt(localStorage.getItem('loginAttempts') || '0');
+    const locked = localStorage.getItem('accountLocked') === 'true';
+    setLoginAttempts(attempts);
+    setIsLocked(locked);
   }, []);
 
-  // Check for user deletion every 30 seconds
   useEffect(() => {
     const checkUserExists = () => {
       if (isLoggedIn && currentUser) {
-        const currentUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        const currentUsers = getSharedData('registeredUsers');
         const userExists = currentUsers.find((u: any) => u.email === currentUser);
         
         if (!userExists) {
@@ -123,7 +147,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => clearInterval(interval);
   }, [isLoggedIn, currentUser]);
 
-  // Auto-logout on browser close
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (currentUser) {
@@ -138,7 +161,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [currentUser]);
 
   const login = (email: string, password: string): boolean => {
+    if (isLocked) {
+      return false;
+    }
+
     if (email === 'amayamusamson@gmail.com' && password === '1029384756') {
+      resetLoginAttempts();
       sessionStorage.setItem('userRole', 'admin');
       sessionStorage.setItem('isLoggedIn', 'true');
       sessionStorage.setItem('currentUser', email);
@@ -157,10 +185,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return true;
     }
 
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const registeredUsers = getSharedData('registeredUsers');
     const user = registeredUsers.find((u: any) => u.email === email && u.password === password);
 
     if (user) {
+      resetLoginAttempts();
       const role = user.role || 'user';
       sessionStorage.setItem('userRole', role);
       sessionStorage.setItem('isLoggedIn', 'true');
@@ -180,7 +209,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return true;
     }
 
+    // Failed login attempt
+    const newAttempts = loginAttempts + 1;
+    setLoginAttempts(newAttempts);
+    localStorage.setItem('loginAttempts', newAttempts.toString());
+
+    if (newAttempts >= 7) {
+      setIsLocked(true);
+      localStorage.setItem('accountLocked', 'true');
+      
+      // Send alert to admin
+      const adminAlert = {
+        id: crypto.randomUUID(),
+        type: 'security_alert',
+        email: email,
+        attempts: newAttempts,
+        timestamp: new Date().toISOString(),
+        message: `Multiple failed login attempts for ${email}`
+      };
+      
+      const alerts = JSON.parse(localStorage.getItem('adminAlerts') || '[]');
+      alerts.push(adminAlert);
+      localStorage.setItem('adminAlerts', JSON.stringify(alerts));
+    }
+
     return false;
+  };
+
+  const resetLoginAttempts = () => {
+    setLoginAttempts(0);
+    setIsLocked(false);
+    localStorage.removeItem('loginAttempts');
+    localStorage.removeItem('accountLocked');
   };
 
   const logout = () => {
@@ -200,7 +260,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, userRole, currentUser, logout, login, checkPasswordStrength }}>
+    <AuthContext.Provider value={{ 
+      isLoggedIn, 
+      userRole, 
+      currentUser, 
+      loginAttempts,
+      isLocked,
+      logout, 
+      login, 
+      checkPasswordStrength,
+      resetLoginAttempts
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -19,7 +19,9 @@ import {
   Banknote,
   Package,
   UserCog,
-  Briefcase
+  Briefcase,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import {
   Sidebar,
@@ -41,6 +43,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -54,7 +57,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const getUserName = () => {
     if (!currentUser) return '';
     
-    // Get registered users from localStorage
     const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     const user = registeredUsers.find((u: any) => u.email === currentUser);
     
@@ -62,12 +64,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       return user.name;
     }
     
-    // Fallback for admin user
     if (currentUser === 'amayamusamson@gmail.com') {
       return 'Admin User';
     }
     
-    return currentUser.split('@')[0]; // Fallback to username part of email
+    return currentUser.split('@')[0];
   };
 
   const hasAccess = (page: string) => {
@@ -103,16 +104,26 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   ];
 
   const AppSidebar = () => (
-    <Sidebar className="w-64 border-r border-border bg-card">
-      <SidebarHeader className="p-4 border-b border-border">
-        <Link to="/" className="text-2xl font-bold text-primary">
-          Numera
-        </Link>
+    <Sidebar className={`${sidebarCollapsed ? 'w-16' : 'w-64'} transition-all duration-300`} style={{ backgroundColor: '#6B7E3F' }}>
+      <SidebarHeader className="p-4 border-b border-white/20" style={{ backgroundColor: '#6B7E3F' }}>
+        {!sidebarCollapsed && (
+          <Link to="/" className="text-2xl font-bold text-white">
+            Numera
+          </Link>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="absolute top-4 right-2 text-white hover:bg-white/10"
+        >
+          {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </Button>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent style={{ backgroundColor: '#6B7E3F' }}>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          {!sidebarCollapsed && <SidebarGroupLabel className="text-white/70">Navigation</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map((item) => {
@@ -125,9 +136,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={item.href} className="flex items-center gap-3">
+                      <Link to={item.href} className="flex items-center gap-3 text-white hover:bg-white/10 p-2 rounded" title={sidebarCollapsed ? item.name : ''}>
                         <Icon className="h-4 w-4" />
-                        <span>{item.name}</span>
+                        {!sidebarCollapsed && <span className="text-sm">{item.name}</span>}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -141,9 +152,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={item.href} className="flex items-center gap-3">
+                      <Link to={item.href} className="flex items-center gap-3 text-white hover:bg-white/10 p-2 rounded text-sm" title={sidebarCollapsed ? item.name : ''}>
                         <Icon className="h-4 w-4" />
-                        <span>{item.name}</span>
+                        {!sidebarCollapsed && <span>{item.name}</span>}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -154,23 +165,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 border-t border-border">
-        <div className="flex items-center justify-between">
+      <SidebarFooter className="p-4 border-t border-white/20" style={{ backgroundColor: '#6B7E3F' }}>
+        <div className="flex flex-col gap-2">
           <ThemeToggle />
           
           {isLoggedIn ? (
             <div className="flex flex-col gap-2">
-              <span className="text-sm text-muted-foreground">
-                User: <span className="font-medium text-foreground">{getUserName()}</span>
-              </span>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              {!sidebarCollapsed && (
+                <span className="text-xs text-white/70">
+                  User: <span className="font-medium text-white">{getUserName()}</span>
+                </span>
+              )}
+              <Button variant="outline" size="sm" onClick={handleLogout} className="bg-transparent border-white/30 text-white hover:bg-white/10">
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                {!sidebarCollapsed && 'Logout'}
               </Button>
             </div>
           ) : (
             <Link to="/login">
-              <Button size="sm">Login</Button>
+              <Button size="sm" className="bg-white text-gray-800 hover:bg-gray-100">
+                {!sidebarCollapsed ? 'Login' : <Home className="h-4 w-4" />}
+              </Button>
             </Link>
           )}
         </div>
@@ -181,37 +196,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        {/* Sidebar */}
         <AppSidebar />
         
-        {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <header className="bg-card border-b border-border p-4">
+          <header className="border-b border-border p-4" style={{ backgroundColor: '#6B7E3F' }}>
             <div className="flex items-center justify-between">
-              <SidebarTrigger />
-              <div className="flex items-center gap-4">
-                <ThemeToggle />
-                {isLoggedIn ? (
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-muted-foreground">
-                      User: <span className="font-medium text-foreground">{getUserName()}</span>
-                    </span>
-                    <Button variant="outline" size="sm" onClick={handleLogout}>
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </Button>
-                  </div>
-                ) : (
-                  <Link to="/login">
-                    <Button size="sm">Login</Button>
-                  </Link>
-                )}
-              </div>
+              <SidebarTrigger className="text-white" />
+              <div className="text-white font-semibold">Numera Business System</div>
             </div>
           </header>
           
-          {/* Page Content */}
           <main className="flex-1 p-6">
             {children}
           </main>
