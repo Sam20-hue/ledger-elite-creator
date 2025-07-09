@@ -104,10 +104,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   ];
 
   const AppSidebar = () => (
-    <Sidebar className={`${sidebarCollapsed ? 'w-16' : 'w-64'} transition-all duration-300`} style={{ backgroundColor: '#6B7E3F' }}>
-      <SidebarHeader className="p-4 border-b border-white/20" style={{ backgroundColor: '#6B7E3F' }}>
+    <Sidebar className={`${sidebarCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 bg-sidebar border-r border-sidebar-border`}>
+      <SidebarHeader className="p-4 border-b border-sidebar-border bg-sidebar">
         {!sidebarCollapsed && (
-          <Link to="/" className="text-2xl font-bold text-white">
+          <Link to="/" className="text-2xl font-bold text-sidebar-foreground">
             Numera
           </Link>
         )}
@@ -115,15 +115,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           variant="ghost"
           size="sm"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="absolute top-4 right-2 text-white hover:bg-white/10"
+          className="absolute top-4 right-2 text-sidebar-foreground hover:bg-sidebar-accent"
         >
           {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </SidebarHeader>
       
-      <SidebarContent style={{ backgroundColor: '#6B7E3F' }}>
+      <SidebarContent className="bg-sidebar">
         <SidebarGroup>
-          {!sidebarCollapsed && <SidebarGroupLabel className="text-white/70">Navigation</SidebarGroupLabel>}
+          {!sidebarCollapsed && <SidebarGroupLabel className="text-sidebar-foreground/70">Navigation</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map((item) => {
@@ -136,7 +136,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={item.href} className="flex items-center gap-3 text-white hover:bg-white/10 p-2 rounded" title={sidebarCollapsed ? item.name : ''}>
+                      <Link 
+                        to={item.href} 
+                        className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground p-2 rounded" 
+                        title={sidebarCollapsed ? item.name : ''}
+                      >
                         <Icon className="h-4 w-4" />
                         {!sidebarCollapsed && <span className="text-sm">{item.name}</span>}
                       </Link>
@@ -152,7 +156,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={item.href} className="flex items-center gap-3 text-white hover:bg-white/10 p-2 rounded text-sm" title={sidebarCollapsed ? item.name : ''}>
+                      <Link 
+                        to={item.href} 
+                        className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground p-2 rounded text-sm" 
+                        title={sidebarCollapsed ? item.name : ''}
+                      >
                         <Icon className="h-4 w-4" />
                         {!sidebarCollapsed && <span>{item.name}</span>}
                       </Link>
@@ -165,25 +173,30 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 border-t border-white/20" style={{ backgroundColor: '#6B7E3F' }}>
+      <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar">
         <div className="flex flex-col gap-2">
           <ThemeToggle />
           
           {isLoggedIn ? (
             <div className="flex flex-col gap-2">
               {!sidebarCollapsed && (
-                <span className="text-xs text-white/70">
-                  User: <span className="font-medium text-white">{getUserName()}</span>
+                <span className="text-xs text-sidebar-foreground/70">
+                  User: <span className="font-medium text-sidebar-foreground">{getUserName()}</span>
                 </span>
               )}
-              <Button variant="outline" size="sm" onClick={handleLogout} className="bg-transparent border-white/30 text-white hover:bg-white/10">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout} 
+                className="bg-transparent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
                 {!sidebarCollapsed && 'Logout'}
               </Button>
             </div>
           ) : (
             <Link to="/login">
-              <Button size="sm" className="bg-white text-gray-800 hover:bg-gray-100">
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 {!sidebarCollapsed ? 'Login' : <Home className="h-4 w-4" />}
               </Button>
             </Link>
@@ -199,10 +212,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          <header className="border-b border-border p-4" style={{ backgroundColor: '#6B7E3F' }}>
+          <header className="border-b border-border p-4 bg-sidebar">
             <div className="flex items-center justify-between">
-              <SidebarTrigger className="text-white" />
-              <div className="text-white font-semibold">Numera Business System</div>
+              <SidebarTrigger className="text-sidebar-foreground" />
+              <div className="text-sidebar-foreground font-semibold">Numera Business System</div>
             </div>
           </header>
           
