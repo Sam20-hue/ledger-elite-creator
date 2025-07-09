@@ -32,11 +32,11 @@ const InvoiceList = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'sent': return 'bg-blue-100 text-blue-800';
-      case 'overdue': return 'bg-red-100 text-red-800';
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'paid': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'sent': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'overdue': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
   };
 
@@ -79,7 +79,7 @@ const InvoiceList = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Invoices</h1>
+        <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
         <Link to="/invoices/new">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
@@ -122,7 +122,7 @@ const InvoiceList = () => {
       {/* Invoice List */}
       <Card>
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="text-foreground">
             All Invoices ({filteredInvoices.length})
           </CardTitle>
         </CardHeader>
@@ -135,19 +135,19 @@ const InvoiceList = () => {
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto table-responsive">
+              <table className="w-full compact-table invoice-table">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-2">Invoice #</th>
-                    <th className="text-left py-3 px-2">Client</th>
-                    <th className="text-left py-3 px-2">Issue Date</th>
-                    <th className="text-left py-3 px-2">Due Date</th>
-                    <th className="text-left py-3 px-2">Selling Price</th>
-                    <th className="text-left py-3 px-2">Buying Price</th>
-                    <th className="text-left py-3 px-2">Profit</th>
-                    <th className="text-left py-3 px-2">Status</th>
-                    <th className="text-left py-3 px-2">Actions</th>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-muted-foreground">Invoice #</th>
+                    <th className="text-left text-muted-foreground">Client</th>
+                    <th className="text-left text-muted-foreground">Issue Date</th>
+                    <th className="text-left text-muted-foreground">Due Date</th>
+                    <th className="text-left text-muted-foreground">Selling Price</th>
+                    <th className="text-left text-muted-foreground">Buying Price</th>
+                    <th className="text-left text-muted-foreground">Profit</th>
+                    <th className="text-left text-muted-foreground">Status</th>
+                    <th className="text-left text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -156,34 +156,35 @@ const InvoiceList = () => {
                     const profit = invoice.total - buyingPrice;
                     
                     return (
-                      <tr key={invoice.id} className="border-b hover:bg-gray-50">
-                        <td className="py-4 px-2 font-medium">{invoice.invoiceNumber}</td>
-                        <td className="py-4 px-2">{invoice.client.name}</td>
-                        <td className="py-4 px-2">{new Date(invoice.issueDate).toLocaleDateString()}</td>
-                        <td className="py-4 px-2">{new Date(invoice.dueDate).toLocaleDateString()}</td>
-                        <td className="py-4 px-2 font-medium">
-                          <div className="flex items-center space-x-2">
+                      <tr key={invoice.id} className="border-b border-border hover:bg-muted/50">
+                        <td className="font-medium text-foreground">{invoice.invoiceNumber}</td>
+                        <td className="text-foreground">{invoice.client.name}</td>
+                        <td className="text-foreground">{new Date(invoice.issueDate).toLocaleDateString()}</td>
+                        <td className="text-foreground">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+                        <td className="font-medium text-foreground">
+                          <div className="flex items-center space-x-1">
                             <span>${invoice.total.toFixed(2)}</span>
                             <Dialog open={priceDialogOpen} onOpenChange={setPriceDialogOpen}>
                               <DialogTrigger asChild>
                                 <Button 
                                   size="sm" 
                                   variant="ghost"
+                                  className="h-6 w-6 p-0"
                                   onClick={() => {
                                     setSelectedInvoice(invoice);
                                     setSellingPrice(invoice.total.toString());
                                   }}
                                 >
-                                  <DollarSign className="h-4 w-4" />
+                                  <DollarSign className="h-3 w-3" />
                                 </Button>
                               </DialogTrigger>
                               <DialogContent>
                                 <DialogHeader>
-                                  <DialogTitle>Update Selling Price</DialogTitle>
+                                  <DialogTitle className="text-foreground">Update Selling Price</DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-4">
                                   <div>
-                                    <label className="block text-sm font-medium mb-2">Selling Price</label>
+                                    <label className="block text-sm font-medium mb-2 text-foreground">Selling Price</label>
                                     <Input
                                       type="number"
                                       value={sellingPrice}
@@ -199,14 +200,14 @@ const InvoiceList = () => {
                             </Dialog>
                           </div>
                         </td>
-                        <td className="py-4 px-2 text-orange-600">${buyingPrice.toFixed(2)}</td>
-                        <td className="py-4 px-2 font-medium text-green-600">${profit.toFixed(2)}</td>
-                        <td className="py-4 px-2">
+                        <td className="text-orange-600">${buyingPrice.toFixed(2)}</td>
+                        <td className="font-medium text-green-600">${profit.toFixed(2)}</td>
+                        <td>
                           <Select
                             value={invoice.status}
                             onValueChange={(value) => handleStatusChange(invoice, value)}
                           >
-                            <SelectTrigger className="w-32">
+                            <SelectTrigger className="w-24 h-8">
                               <Badge className={getStatusColor(invoice.status)}>
                                 {invoice.status}
                               </Badge>
@@ -219,24 +220,25 @@ const InvoiceList = () => {
                             </SelectContent>
                           </Select>
                         </td>
-                        <td className="py-4 px-2">
-                          <div className="flex space-x-2">
+                        <td>
+                          <div className="flex space-x-1">
                             <Link to={`/invoices/${invoice.id}/preview`}>
-                              <Button size="sm" variant="outline">
-                                <Eye className="h-4 w-4" />
+                              <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                                <Eye className="h-3 w-3" />
                               </Button>
                             </Link>
                             <Link to={`/invoices/${invoice.id}`}>
-                              <Button size="sm" variant="outline">
-                                <Edit className="h-4 w-4" />
+                              <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                                <Edit className="h-3 w-3" />
                               </Button>
                             </Link>
                             <Button
                               size="sm"
                               variant="outline"
+                              className="h-8 w-8 p-0"
                               onClick={() => handleDelete(invoice.id)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
                         </td>

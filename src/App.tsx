@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ import EnhancedSettings from "@/components/EnhancedSettings";
 import NotFound from "@/pages/NotFound";
 import BankAccounts from "@/components/BankAccounts";
 import EmailJSSetup from "@/components/EmailJSSetup";
+import InventoryManagement from "@/components/InventoryManagement";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +48,7 @@ const App = () => (
                   <Route path="/invoices/:id" element={<InvoiceForm />} />
                   <Route path="/invoices/:id/preview" element={<InvoicePreview />} />
                   <Route path="/clients" element={<EnhancedClientManagement />} />
+                  <Route path="/inventory" element={<InventoryManagement />} />
                   <Route path="/financial-reports" element={<FinancialReports />} />
                   <Route path="/bank-accounts" element={<BankAccounts />} />
                   <Route path="/payments" element={<PaymentTracking />} />

@@ -118,7 +118,7 @@ const EnhancedClientManagement = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <Users className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold">Client Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Client Management</h1>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
@@ -132,14 +132,14 @@ const EnhancedClientManagement = () => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-foreground">
                 {editingClient ? 'Edit Client' : 'Add New Client'}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="name" className="text-foreground">Full Name *</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -149,7 +149,7 @@ const EnhancedClientManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email" className="text-foreground">Email *</Label>
                   <Input
                     id="email"
                     type="email"
@@ -160,7 +160,7 @@ const EnhancedClientManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone" className="text-foreground">Phone</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
@@ -169,7 +169,7 @@ const EnhancedClientManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="company" className="text-foreground">Company</Label>
                   <Input
                     id="company"
                     value={formData.company}
@@ -178,7 +178,7 @@ const EnhancedClientManagement = () => {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="address">Address</Label>
+                  <Label htmlFor="address" className="text-foreground">Address</Label>
                   <Input
                     id="address"
                     value={formData.address}
@@ -187,7 +187,7 @@ const EnhancedClientManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city" className="text-foreground">City</Label>
                   <Input
                     id="city"
                     value={formData.city}
@@ -196,7 +196,7 @@ const EnhancedClientManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="zipCode">ZIP Code</Label>
+                  <Label htmlFor="zipCode" className="text-foreground">ZIP Code</Label>
                   <Input
                     id="zipCode"
                     value={formData.zipCode}
@@ -205,7 +205,7 @@ const EnhancedClientManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="country">Country</Label>
+                  <Label htmlFor="country" className="text-foreground">Country</Label>
                   <Input
                     id="country"
                     value={formData.country}
@@ -214,7 +214,7 @@ const EnhancedClientManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="taxId">Tax ID</Label>
+                  <Label htmlFor="taxId" className="text-foreground">Tax ID</Label>
                   <Input
                     id="taxId"
                     value={formData.taxId}
@@ -254,7 +254,7 @@ const EnhancedClientManagement = () => {
       {/* Clients Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Clients ({filteredClients.length})</CardTitle>
+          <CardTitle className="text-foreground">All Clients ({filteredClients.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {filteredClients.length === 0 ? (
@@ -265,58 +265,60 @@ const EnhancedClientManagement = () => {
               </Button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto table-responsive">
+              <table className="w-full compact-table client-table">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-2">Name</th>
-                    <th className="text-left py-3 px-2">Company</th>
-                    <th className="text-left py-3 px-2">Email</th>
-                    <th className="text-left py-3 px-2">Phone</th>
-                    <th className="text-left py-3 px-2">Location</th>
-                    <th className="text-left py-3 px-2">Tax ID</th>
-                    <th className="text-left py-3 px-2">Actions</th>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-muted-foreground">Name</th>
+                    <th className="text-left text-muted-foreground">Company</th>
+                    <th className="text-left text-muted-foreground">Email</th>
+                    <th className="text-left text-muted-foreground">Phone</th>
+                    <th className="text-left text-muted-foreground">Location</th>
+                    <th className="text-left text-muted-foreground">Tax ID</th>
+                    <th className="text-left text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredClients.map((client) => (
-                    <tr key={client.id} className="border-b hover:bg-gray-50">
-                      <td className="py-4 px-2 font-medium">{client.name}</td>
-                      <td className="py-4 px-2">{client.company || '-'}</td>
-                      <td className="py-4 px-2">
-                        <div className="flex items-center space-x-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span>{client.email}</span>
+                    <tr key={client.id} className="border-b border-border hover:bg-muted/50">
+                      <td className="font-medium text-foreground">{client.name}</td>
+                      <td className="text-foreground">{client.company || '-'}</td>
+                      <td className="text-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Mail className="h-3 w-3 text-muted-foreground" />
+                          <span className="truncate">{client.email}</span>
                         </div>
                       </td>
-                      <td className="py-4 px-2">
-                        <div className="flex items-center space-x-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
+                      <td className="text-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Phone className="h-3 w-3 text-muted-foreground" />
                           <span>{client.phone || '-'}</span>
                         </div>
                       </td>
-                      <td className="py-4 px-2">
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span>{client.city ? `${client.city}, ${client.country}` : '-'}</span>
+                      <td className="text-foreground">
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="h-3 w-3 text-muted-foreground" />
+                          <span className="truncate">{client.city ? `${client.city}, ${client.country}` : '-'}</span>
                         </div>
                       </td>
-                      <td className="py-4 px-2">{client.taxId || '-'}</td>
-                      <td className="py-4 px-2">
-                        <div className="flex space-x-2">
+                      <td className="text-foreground">{client.taxId || '-'}</td>
+                      <td>
+                        <div className="flex space-x-1">
                           <Button
                             size="sm"
                             variant="outline"
+                            className="h-8 w-8 p-0"
                             onClick={() => handleEdit(client)}
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-3 w-3" />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
+                            className="h-8 w-8 p-0"
                             onClick={() => handleDelete(client.id)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
                       </td>
