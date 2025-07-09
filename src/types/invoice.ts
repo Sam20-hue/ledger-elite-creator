@@ -1,3 +1,4 @@
+
 export interface Client {
   id: string;
   name: string;
@@ -14,6 +15,7 @@ export interface Client {
 export interface InvoiceItem {
   id: string;
   description: string;
+  details?: string;
   quantity: number;
   rate: number;
   buyingPrice?: number;
@@ -31,6 +33,7 @@ export interface Invoice {
   subtotal: number;
   tax: number;
   taxRate: number;
+  discount: number;
   total: number;
   currency: string;
   status: 'draft' | 'sent' | 'paid' | 'overdue';

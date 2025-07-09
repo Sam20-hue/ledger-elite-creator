@@ -314,7 +314,7 @@ const BankAccounts = () => {
       ))}
 
       {/* Accounts List by Currency */}
-      {Object.entries(groupedAccounts).map(([currency, currencyAccounts]) => (
+      {(Object.entries(groupedAccounts) as [string, any[]][]).map(([currency, currencyAccounts]) => (
         <div key={currency} className="space-y-4">
           <h2 className="text-xl font-semibold">{currency} Accounts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
