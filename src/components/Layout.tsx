@@ -21,7 +21,8 @@ import {
   UserCog,
   Briefcase,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Lock
 } from 'lucide-react';
 import {
   Sidebar,
@@ -96,6 +97,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Email Service', href: '/email-service', icon: Mail, requiresAuth: true, permission: 'email-service' },
     { name: 'Company', href: '/company', icon: Building2, requiresAuth: true, permission: 'company' },
     { name: 'Integrations', href: '/integrations', icon: Briefcase, requiresAuth: true, permission: 'integrations' },
+    { name: 'Freeze', href: '/freeze', icon: Lock, requiresAuth: true, permission: 'freeze' },
     { name: 'Settings', href: '/settings', icon: Settings, requiresAuth: true, permission: 'settings' },
   ];
 

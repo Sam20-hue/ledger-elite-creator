@@ -11,6 +11,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './components/Dashboard';
 import InvoiceList from './components/InvoiceList';
+import InvoiceForm from './components/InvoiceForm';
+import InvoicePreviewPage from './components/InvoicePreviewPage';
 import EnhancedClientManagement from './components/EnhancedClientManagement';
 import InventoryManagement from './components/InventoryManagement';
 import FinancialReports from './components/FinancialReports';
@@ -21,6 +23,7 @@ import EmailService from './components/EmailService';
 import CompanySettings from './components/CompanySettings';
 import IntegrationsPage from './components/IntegrationsPage';
 import SettingsPage from './components/SettingsPage';
+import FreezeSettings from './components/FreezeSettings';
 import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 
@@ -45,6 +48,21 @@ function App() {
                   <Route path="/invoices" element={
                     <ProtectedRoute requiredPermission="invoices">
                       <InvoiceList />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/invoices/new" element={
+                    <ProtectedRoute requiredPermission="invoices">
+                      <InvoiceForm />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/invoices/:id" element={
+                    <ProtectedRoute requiredPermission="invoices">
+                      <InvoiceForm />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/invoices/:id/preview" element={
+                    <ProtectedRoute requiredPermission="invoices">
+                      <InvoicePreviewPage />
                     </ProtectedRoute>
                   } />
                   <Route path="/clients" element={
@@ -95,6 +113,11 @@ function App() {
                   <Route path="/settings" element={
                     <ProtectedRoute requiredPermission="settings">
                       <SettingsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/freeze" element={
+                    <ProtectedRoute requiredPermission="freeze">
+                      <FreezeSettings />
                     </ProtectedRoute>
                   } />
                   <Route path="/admin" element={
