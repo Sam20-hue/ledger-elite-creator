@@ -1,47 +1,25 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, Unlock } from 'lucide-react';
-
-interface FreezeSettings {
-  paidInvoices: boolean;
-  savedClients: boolean;
-  completedPayments: boolean;
-  finalizedReports: boolean;
-  confirmedOrders: boolean;
-  processedTransactions: boolean;
-}
+import { useFreeze } from '@/contexts/FreezeContext';
 
 const FreezeSettings = () => {
   const { toast } = useToast();
-  const [freezeSettings, setFreezeSettings] = useState<FreezeSettings>({
-    paidInvoices: false,
-    savedClients: false,
-    completedPayments: false,
-    finalizedReports: false,
-    confirmedOrders: false,
-    processedTransactions: false,
-  });
+  const { freezeSettings, updateFreezeSettings } = useFreeze();
 
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('freezeSettings');
-    if (savedSettings) {
-      setFreezeSettings(JSON.parse(savedSettings));
-    }
-  }, []);
-
-  const handleSettingChange = (setting: keyof FreezeSettings, value: boolean) => {
-    setFreezeSettings(prev => ({
-      ...prev,
+  const handleSettingChange = (setting: keyof typeof freezeSettings, value: boolean) => {
+    const newSettings = {
+      ...freezeSettings,
       [setting]: value
-    }));
+    };
+    updateFreezeSettings(newSettings);
   };
 
   const saveSettings = () => {
-    localStorage.setItem('freezeSettings', JSON.stringify(freezeSettings));
     toast({
       title: "Success",
       description: "Freeze settings saved successfully",
@@ -49,7 +27,7 @@ const FreezeSettings = () => {
   };
 
   const resetSettings = () => {
-    const defaultSettings: FreezeSettings = {
+    const defaultSettings = {
       paidInvoices: false,
       savedClients: false,
       completedPayments: false,
@@ -57,8 +35,7 @@ const FreezeSettings = () => {
       confirmedOrders: false,
       processedTransactions: false,
     };
-    setFreezeSettings(defaultSettings);
-    localStorage.setItem('freezeSettings', JSON.stringify(defaultSettings));
+    updateFreezeSettings(defaultSettings);
     toast({
       title: "Success",
       description: "Freeze settings reset successfully",
@@ -67,32 +44,32 @@ const FreezeSettings = () => {
 
   const freezeOptions = [
     {
-      key: 'paidInvoices' as keyof FreezeSettings,
+      key: 'paidInvoices' as keyof typeof freezeSettings,
       title: 'Paid Invoices',
       description: 'Prevent editing of invoices marked as paid'
     },
     {
-      key: 'savedClients' as keyof FreezeSettings,
+      key: 'savedClients' as keyof typeof freezeSettings,
       title: 'Saved Clients',
       description: 'Prevent editing of client information once saved'
     },
     {
-      key: 'completedPayments' as keyof FreezeSettings,
+      key: 'completedPayments' as keyof typeof freezeSettings,
       title: 'Completed Payments',
       description: 'Prevent editing of completed payment records'
     },
     {
-      key: 'finalizedReports' as keyof FreezeSettings,
+      key: 'finalizedReports' as keyof typeof freezeSettings,
       title: 'Finalized Reports',
       description: 'Prevent editing of finalized financial reports'
     },
     {
-      key: 'confirmedOrders' as keyof FreezeSettings,
+      key: 'confirmedOrders' as keyof typeof freezeSettings,
       title: 'Confirmed Orders',
       description: 'Prevent editing of confirmed inventory orders'
     },
     {
-      key: 'processedTransactions' as keyof FreezeSettings,
+      key: 'processedTransactions' as keyof typeof freezeSettings,
       title: 'Processed Transactions',
       description: 'Prevent editing of processed bank transactions'
     }
@@ -118,7 +95,7 @@ const FreezeSettings = () => {
         <CardHeader>
           <CardTitle className="text-foreground">System Freeze Controls</CardTitle>
           <p className="text-muted-foreground">
-            Configure which parts of the system should be frozen to prevent accidental edits
+            Configure which parts of the Numera system should be frozen to prevent accidental edits
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
