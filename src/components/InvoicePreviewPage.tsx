@@ -50,28 +50,42 @@ const InvoicePreviewPage = () => {
   const handleDownloadPDF = async () => {
     try {
       const { jsPDF } = await import('jspdf');
-      const pdf = new jsPDF();
       
       if (printRef.current) {
         const canvas = await import('html2canvas');
-        const canvasElement = await canvas.default(printRef.current);
+        const canvasElement = await canvas.default(printRef.current, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: 794, // A4 width
+          height: 1123 // A4 height
+        });
+        
         const imgData = canvasElement.toDataURL('image/png');
         
-        const imgWidth = 210;
-        const pageHeight = 295;
-        const imgHeight = (canvasElement.height * imgWidth) / canvasElement.width;
-        let heightLeft = imgHeight;
+        // A4 size in mm
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
         
+        // Calculate image dimensions to fit A4
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvasElement.height * pdfWidth) / canvasElement.width;
+        
+        let heightLeft = imgHeight;
         let position = 0;
         
+        // Add first page
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        heightLeft -= pdfHeight;
         
+        // Add additional pages if needed
         while (heightLeft >= 0) {
           position = heightLeft - imgHeight;
           pdf.addPage();
           pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
+          heightLeft -= pdfHeight;
         }
         
         pdf.save(`invoice-${invoice?.invoiceNumber}.pdf`);

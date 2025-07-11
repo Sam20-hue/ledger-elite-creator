@@ -30,4 +30,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Add this for SPA routing
+  preview: {
+    port: 8080,
+    host: true,
+  },
 }))
