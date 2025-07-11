@@ -1,4 +1,3 @@
-
 import React, { forwardRef } from 'react';
 import { Invoice } from '@/types/invoice';
 
@@ -9,6 +8,12 @@ interface InvoicePreviewProps {
 
 const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
   ({ invoice, isDownload = false }, ref) => {
+    // Helper function to safely convert to number and format
+    const formatCurrency = (value: string | number): string => {
+      const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+      return numValue.toFixed(2);
+    };
+
     const styles = {
       container: {
         backgroundColor: '#ffffff',
@@ -131,17 +136,23 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
             </tr>
           </thead>
           <tbody>
-            {invoice.items.map((item, index) => (
-              <tr key={index}>
-                <td style={styles.td}>
-                  <strong>{item.description}</strong>
-                  {item.details && <div style={{ fontSize: '12px', color: '#6b7280' }}>{item.details}</div>}
-                </td>
-                <td style={styles.td}>{item.quantity}</td>
-                <td style={styles.td}>${item.rate.toFixed(2)}</td>
-                <td style={styles.td}>${(item.quantity * item.rate).toFixed(2)}</td>
-              </tr>
-            ))}
+            {invoice.items.map((item, index) => {
+              const quantity = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
+              const rate = typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate;
+              const amount = quantity * rate;
+              
+              return (
+                <tr key={index}>
+                  <td style={styles.td}>
+                    <strong>{item.description}</strong>
+                    {item.details && <div style={{ fontSize: '12px', color: '#6b7280' }}>{item.details}</div>}
+                  </td>
+                  <td style={styles.td}>{quantity}</td>
+                  <td style={styles.td}>${formatCurrency(rate)}</td>
+                  <td style={styles.td}>${formatCurrency(amount)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
@@ -149,24 +160,24 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
           <div style={{ minWidth: '250px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0' }}>
               <span>Subtotal:</span>
-              <span>${invoice.subtotal.toFixed(2)}</span>
+              <span>${formatCurrency(invoice.subtotal)}</span>
             </div>
             {invoice.taxRate > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0' }}>
                 <span>Tax ({invoice.taxRate}%):</span>
-                <span>${invoice.tax.toFixed(2)}</span>
+                <span>${formatCurrency(invoice.tax)}</span>
               </div>
             )}
             {invoice.discount > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', color: '#dc2626' }}>
                 <span>Discount:</span>
-                <span>-${invoice.discount.toFixed(2)}</span>
+                <span>-${formatCurrency(invoice.discount)}</span>
               </div>
             )}
             <div style={styles.total}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>TOTAL:</span>
-                <span>${invoice.total.toFixed(2)}</span>
+                <span>${formatCurrency(invoice.total)}</span>
               </div>
             </div>
           </div>

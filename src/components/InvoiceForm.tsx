@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -120,16 +119,27 @@ const InvoiceForm = () => {
     }
   }, [id, invoices, reset]);
 
-  // Calculate amounts
   useEffect(() => {
     watchedItems.forEach((item, index) => {
-      const amount = item.quantity * item.rate;
+      const quantity = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
+      const rate = typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate;
+      const amount = quantity * rate;
       setValue(`items.${index}.amount`, amount);
     });
   }, [watchedItems, setValue]);
 
-  const subtotal = watchedItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-  const buyingTotal = watchedItems.reduce((sum, item) => sum + (item.quantity * (item.buyingPrice || 0)), 0);
+  const subtotal = watchedItems.reduce((sum, item) => {
+    const quantity = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
+    const rate = typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate;
+    return sum + (quantity * rate);
+  }, 0);
+  
+  const buyingTotal = watchedItems.reduce((sum, item) => {
+    const quantity = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
+    const buyingPrice = typeof item.buyingPrice === 'string' ? parseFloat(item.buyingPrice) || 0 : (item.buyingPrice || 0);
+    return sum + (quantity * buyingPrice);
+  }, 0);
+  
   const tax = subtotal * (watchedTaxRate / 100);
   const discount = watchedDiscount || 0;
   const total = subtotal + tax - discount;
@@ -181,6 +191,15 @@ const InvoiceForm = () => {
       return;
     }
 
+    const processedItems = data.items.map(item => ({
+      ...item,
+      quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity,
+      rate: typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate,
+      buyingPrice: typeof item.buyingPrice === 'string' ? parseFloat(item.buyingPrice) || 0 : (item.buyingPrice || 0),
+      amount: (typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity) * 
+              (typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate)
+    }));
+
     const invoiceData: Invoice = {
       id: isEditing ? id! : crypto.randomUUID(),
       invoiceNumber: isEditing ? invoices.find(inv => inv.id === id)!.invoiceNumber : getNextInvoiceNumber(),
@@ -188,7 +207,7 @@ const InvoiceForm = () => {
       client: selectedClient,
       issueDate: data.issueDate,
       dueDate: data.dueDate,
-      items: data.items,
+      items: processedItems,
       subtotal,
       tax,
       taxRate: data.taxRate,
@@ -226,6 +245,13 @@ const InvoiceForm = () => {
     
     const selectedClient = clients.find(client => client.id === data.clientId);
     if (selectedClient) {
+      const processedItems = data.items.map(item => ({
+        ...item,
+        quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity,
+        rate: typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate,
+        buyingPrice: typeof item.buyingPrice === 'string' ? parseFloat(item.buyingPrice) || 0 : (item.buyingPrice || 0),
+      }));
+
       const invoiceData: Invoice = {
         id: isEditing ? id! : crypto.randomUUID(),
         invoiceNumber: isEditing ? invoices.find(inv => inv.id === id)!.invoiceNumber : getNextInvoiceNumber(),
@@ -233,7 +259,7 @@ const InvoiceForm = () => {
         client: selectedClient,
         issueDate: data.issueDate,
         dueDate: data.dueDate,
-        items: data.items,
+        items: processedItems,
         subtotal,
         tax,
         taxRate: data.taxRate,
@@ -390,7 +416,14 @@ const InvoiceForm = () => {
                     <Input
                       type="number"
                       step="0.01"
-                      value={(watchedItems[index]?.quantity || 0) * (watchedItems[index]?.rate || 0)}
+                      value={(
+                        (typeof watchedItems[index]?.quantity === 'string' ? 
+                          parseFloat(watchedItems[index]?.quantity) || 0 : 
+                          watchedItems[index]?.quantity || 0) * 
+                        (typeof watchedItems[index]?.rate === 'string' ? 
+                          parseFloat(watchedItems[index]?.rate) || 0 : 
+                          watchedItems[index]?.rate || 0)
+                      ).toFixed(2)}
                       disabled
                     />
                   </div>
