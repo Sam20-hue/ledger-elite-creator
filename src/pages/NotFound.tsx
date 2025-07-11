@@ -8,6 +8,15 @@ import { Home, ArrowLeft } from 'lucide-react';
 const NotFound = () => {
   const navigate = useNavigate();
 
+  // Check if we're on a valid route that should exist (like invoice preview)
+  React.useEffect(() => {
+    const path = window.location.pathname;
+    if (path.includes('/invoices/') && path.includes('/preview')) {
+      // This might be a valid invoice preview route, redirect to home and let routing handle it
+      window.location.href = '/';
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md text-center">

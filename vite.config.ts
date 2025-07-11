@@ -23,7 +23,8 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     host: "::",
-    port: 8080
+    port: 8080,
+    historyApiFallback: true
   },
   resolve: {
     alias: {
@@ -34,5 +35,6 @@ export default defineConfig(({ mode }) => ({
   preview: {
     port: 8080,
     host: true,
+    historyApiFallback: true
   },
 }))

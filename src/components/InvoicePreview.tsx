@@ -26,124 +26,151 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       container: {
         backgroundColor: '#ffffff',
         color: '#000000',
-        padding: '40px',
+        padding: isDownload ? '20px' : '40px',
         fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-        lineHeight: '1.6',
-        fontSize: '14px',
-        width: '794px', // A4 width in pixels (210mm)
-        minHeight: '1123px', // A4 height in pixels (297mm)
+        lineHeight: '1.4',
+        fontSize: '12px',
+        width: '210mm', // A4 width
+        minHeight: '297mm', // A4 height
+        maxWidth: '210mm',
         margin: '0 auto',
         boxShadow: isDownload ? 'none' : '0 0 20px rgba(0,0,0,0.1)',
-        position: 'relative' as const
+        position: 'relative' as const,
+        pageBreakInside: 'avoid',
+        overflow: 'hidden'
       },
       header: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: '40px',
-        paddingBottom: '20px',
-        borderBottom: '3px solid #2563eb'
+        marginBottom: '25px',
+        paddingBottom: '15px',
+        borderBottom: '2px solid #2563eb'
       },
       companySection: {
         flex: 1,
-        maxWidth: '50%'
+        maxWidth: '48%'
       },
       companyName: {
-        fontSize: '32px',
+        fontSize: isDownload ? '20px' : '24px',
         fontWeight: 'bold',
         color: '#2563eb',
-        marginBottom: '8px',
-        fontFamily: '"Arial Black", Arial, sans-serif'
+        marginBottom: '6px',
+        fontFamily: '"Arial Black", Arial, sans-serif',
+        wordWrap: 'break-word' as const
       },
       invoiceSection: {
         textAlign: 'right' as const,
         flex: 1,
-        maxWidth: '50%'
+        maxWidth: '48%'
       },
       invoiceTitle: {
-        fontSize: '36px',
+        fontSize: isDownload ? '24px' : '28px',
         fontWeight: 'bold',
         color: '#1f2937',
-        marginBottom: '10px',
+        marginBottom: '8px',
         fontFamily: '"Arial Black", Arial, sans-serif'
       },
       invoiceDetails: {
-        fontSize: '16px',
+        fontSize: isDownload ? '11px' : '13px',
         color: '#374151'
       },
       clientSection: {
-        marginBottom: '30px',
+        marginBottom: '20px',
         backgroundColor: '#f8fafc',
-        padding: '20px',
-        borderRadius: '8px',
+        padding: '15px',
+        borderRadius: '6px',
         border: '1px solid #e2e8f0'
       },
       sectionTitle: {
-        fontSize: '18px',
+        fontSize: isDownload ? '14px' : '16px',
         fontWeight: 'bold',
         color: '#1f2937',
-        marginBottom: '12px'
+        marginBottom: '8px'
       },
       table: {
         width: '100%',
         borderCollapse: 'collapse' as const,
-        marginBottom: '30px',
-        fontSize: '14px'
+        marginBottom: '20px',
+        fontSize: isDownload ? '10px' : '12px'
       },
       th: {
         backgroundColor: '#2563eb',
         color: '#ffffff',
-        padding: '15px 12px',
+        padding: isDownload ? '8px 6px' : '12px 10px',
         textAlign: 'left' as const,
         fontWeight: 'bold',
-        borderBottom: '2px solid #1d4ed8'
+        borderBottom: '2px solid #1d4ed8',
+        fontSize: isDownload ? '10px' : '12px'
       },
       td: {
-        padding: '12px',
+        padding: isDownload ? '6px' : '10px',
         borderBottom: '1px solid #e5e7eb',
-        verticalAlign: 'top' as const
+        verticalAlign: 'top' as const,
+        fontSize: isDownload ? '10px' : '12px',
+        wordWrap: 'break-word' as const,
+        maxWidth: '0',
+        overflow: 'hidden' as const
       },
       totalSection: {
         display: 'flex',
         justifyContent: 'flex-end',
-        marginBottom: '30px'
+        marginBottom: '20px'
       },
       totalBox: {
-        minWidth: '300px',
+        minWidth: isDownload ? '200px' : '250px',
         backgroundColor: '#f8fafc',
         border: '1px solid #e2e8f0',
-        borderRadius: '8px',
+        borderRadius: '6px',
         overflow: 'hidden'
       },
       totalRow: {
         display: 'flex',
         justifyContent: 'space-between',
-        padding: '12px 20px',
-        borderBottom: '1px solid #e2e8f0'
+        padding: isDownload ? '8px 12px' : '10px 15px',
+        borderBottom: '1px solid #e2e8f0',
+        fontSize: isDownload ? '11px' : '12px'
       },
       grandTotal: {
         display: 'flex',
         justifyContent: 'space-between',
-        padding: '15px 20px',
+        padding: isDownload ? '10px 12px' : '12px 15px',
         backgroundColor: '#2563eb',
         color: '#ffffff',
-        fontSize: '18px',
+        fontSize: isDownload ? '13px' : '15px',
         fontWeight: 'bold'
       },
+      notesSection: {
+        marginBottom: '20px',
+        pageBreakInside: 'avoid'
+      },
+      notesContent: {
+        backgroundColor: '#f8fafc',
+        padding: isDownload ? '10px' : '12px',
+        borderRadius: '6px',
+        border: '1px solid #e2e8f0',
+        color: '#374151',
+        fontSize: isDownload ? '10px' : '11px',
+        lineHeight: '1.4',
+        wordWrap: 'break-word' as const,
+        maxHeight: isDownload ? '60px' : 'auto',
+        overflow: isDownload ? 'hidden' : 'visible' as const
+      },
       footer: {
-        marginTop: '40px',
-        padding: '20px',
+        marginTop: '20px',
+        padding: isDownload ? '12px' : '15px',
         backgroundColor: '#f1f5f9',
         textAlign: 'center' as const,
         color: '#64748b',
-        fontSize: '12px',
-        borderRadius: '8px'
+        fontSize: isDownload ? '9px' : '11px',
+        borderRadius: '6px',
+        pageBreakInside: 'avoid'
       },
       logo: {
-        maxWidth: '120px',
-        maxHeight: '60px',
+        maxWidth: isDownload ? '80px' : '100px',
+        maxHeight: isDownload ? '40px' : '50px',
         objectFit: 'contain' as const,
-        marginBottom: '10px'
+        marginBottom: '8px'
       }
     };
 
@@ -159,9 +186,9 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
               <img src={company.logo} alt="Company Logo" style={styles.logo} />
             )}
             <h1 style={styles.companyName}>{company.name || 'Your Company Name'}</h1>
-            <div style={{ color: '#6b7280', fontSize: '14px' }}>
+            <div style={{ color: '#6b7280', fontSize: isDownload ? '10px' : '12px' }}>
               {company.address && <div>{company.address}</div>}
-              {company.city && company.zipCode && company.country && (
+              {company.city && company.zipCode && (
                 <div>{company.city}, {company.zipCode}</div>
               )}
               {company.country && <div>{company.country}</div>}
@@ -174,10 +201,10 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
           <div style={styles.invoiceSection}>
             <h2 style={styles.invoiceTitle}>INVOICE</h2>
             <div style={styles.invoiceDetails}>
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '6px' }}>
                 <strong>Invoice #:</strong> {invoice.invoiceNumber}
               </div>
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '6px' }}>
                 <strong>Issue Date:</strong> {new Date(invoice.issueDate).toLocaleDateString()}
               </div>
               <div>
@@ -189,15 +216,15 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
 
         <div style={styles.clientSection}>
           <h3 style={styles.sectionTitle}>Bill To:</h3>
-          <div style={{ fontSize: '16px' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{invoice.client.name}</div>
-            {invoice.client.company && <div style={{ marginBottom: '4px' }}>{invoice.client.company}</div>}
-            {invoice.client.address && <div style={{ marginBottom: '4px' }}>{invoice.client.address}</div>}
+          <div style={{ fontSize: isDownload ? '11px' : '13px' }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '3px' }}>{invoice.client.name}</div>
+            {invoice.client.company && <div style={{ marginBottom: '3px' }}>{invoice.client.company}</div>}
+            {invoice.client.address && <div style={{ marginBottom: '3px' }}>{invoice.client.address}</div>}
             {invoice.client.city && invoice.client.zipCode && (
-              <div style={{ marginBottom: '4px' }}>{invoice.client.city}, {invoice.client.zipCode}</div>
+              <div style={{ marginBottom: '3px' }}>{invoice.client.city}, {invoice.client.zipCode}</div>
             )}
-            {invoice.client.country && <div style={{ marginBottom: '4px' }}>{invoice.client.country}</div>}
-            <div style={{ marginBottom: '4px' }}>Email: {invoice.client.email}</div>
+            {invoice.client.country && <div style={{ marginBottom: '3px' }}>{invoice.client.country}</div>}
+            <div style={{ marginBottom: '3px' }}>Email: {invoice.client.email}</div>
             {invoice.client.phone && <div>Phone: {invoice.client.phone}</div>}
           </div>
         </div>
@@ -205,10 +232,10 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
         <table style={styles.table}>
           <thead>
             <tr>
-              <th style={styles.th}>Description</th>
-              <th style={styles.th}>Qty</th>
-              <th style={styles.th}>Rate</th>
-              <th style={styles.th}>Amount</th>
+              <th style={{...styles.th, width: '50%'}}>Description</th>
+              <th style={{...styles.th, width: '15%'}}>Qty</th>
+              <th style={{...styles.th, width: '20%'}}>Rate</th>
+              <th style={{...styles.th, width: '15%'}}>Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -220,9 +247,14 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
               return (
                 <tr key={index}>
                   <td style={styles.td}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{item.description}</div>
+                    <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{item.description}</div>
                     {item.details && (
-                      <div style={{ fontSize: '12px', color: '#6b7280' }}>{item.details}</div>
+                      <div style={{ fontSize: isDownload ? '9px' : '10px', color: '#6b7280' }}>
+                        {isDownload && item.details.length > 50 ? 
+                          `${item.details.substring(0, 50)}...` : 
+                          item.details
+                        }
+                      </div>
                     )}
                   </td>
                   <td style={styles.td}>{quantity}</td>
@@ -259,25 +291,22 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
           </div>
         </div>
 
-        {invoice.notes && (
-          <div style={{ marginBottom: '30px' }}>
+        {invoice.notes && invoice.notes.trim() && (
+          <div style={styles.notesSection}>
             <h3 style={styles.sectionTitle}>Notes:</h3>
-            <div style={{ 
-              backgroundColor: '#f8fafc', 
-              padding: '15px', 
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              color: '#374151' 
-            }}>
-              {invoice.notes}
+            <div style={styles.notesContent}>
+              {isDownload && invoice.notes.length > 200 ? 
+                `${invoice.notes.substring(0, 200)}...` : 
+                invoice.notes
+              }
             </div>
           </div>
         )}
 
         <div style={styles.footer}>
-          <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Thank you for your business!</div>
-          <div style={{ marginBottom: '8px' }}>We appreciate your partnership and look forward to serving you again.</div>
-          <div style={{ fontSize: '11px', marginTop: '10px' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>Thank you for your business!</div>
+          <div style={{ marginBottom: '6px' }}>We appreciate your partnership and look forward to serving you again.</div>
+          <div style={{ fontSize: isDownload ? '8px' : '10px', marginTop: '8px' }}>
             This invoice was generated electronically and is valid without signature.
           </div>
         </div>
