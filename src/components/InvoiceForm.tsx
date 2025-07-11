@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -191,15 +192,6 @@ const InvoiceForm = () => {
       return;
     }
 
-    const processedItems = data.items.map(item => ({
-      ...item,
-      quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity,
-      rate: typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate,
-      buyingPrice: typeof item.buyingPrice === 'string' ? parseFloat(item.buyingPrice) || 0 : (item.buyingPrice || 0),
-      amount: (typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity) * 
-              (typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate)
-    }));
-
     const invoiceData: Invoice = {
       id: isEditing ? id! : crypto.randomUUID(),
       invoiceNumber: isEditing ? invoices.find(inv => inv.id === id)!.invoiceNumber : getNextInvoiceNumber(),
@@ -207,7 +199,7 @@ const InvoiceForm = () => {
       client: selectedClient,
       issueDate: data.issueDate,
       dueDate: data.dueDate,
-      items: processedItems,
+      items: data.items,
       subtotal,
       tax,
       taxRate: data.taxRate,
@@ -245,13 +237,6 @@ const InvoiceForm = () => {
     
     const selectedClient = clients.find(client => client.id === data.clientId);
     if (selectedClient) {
-      const processedItems = data.items.map(item => ({
-        ...item,
-        quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity,
-        rate: typeof item.rate === 'string' ? parseFloat(item.rate) || 0 : item.rate,
-        buyingPrice: typeof item.buyingPrice === 'string' ? parseFloat(item.buyingPrice) || 0 : (item.buyingPrice || 0),
-      }));
-
       const invoiceData: Invoice = {
         id: isEditing ? id! : crypto.randomUUID(),
         invoiceNumber: isEditing ? invoices.find(inv => inv.id === id)!.invoiceNumber : getNextInvoiceNumber(),
@@ -259,7 +244,7 @@ const InvoiceForm = () => {
         client: selectedClient,
         issueDate: data.issueDate,
         dueDate: data.dueDate,
-        items: processedItems,
+        items: data.items,
         subtotal,
         tax,
         taxRate: data.taxRate,
