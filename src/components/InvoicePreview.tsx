@@ -1,3 +1,4 @@
+
 import React, { forwardRef } from 'react';
 import { Invoice } from '@/types/invoice';
 import { useInvoice } from '@/contexts/InvoiceContext';
@@ -25,38 +26,44 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       container: {
         backgroundColor: '#ffffff',
         color: '#000000',
-        padding: isDownload ? '20px' : '40px',
-        fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+        padding: isDownload ? '15mm' : '40px',
+        fontFamily: '"Arial", "Helvetica", sans-serif',
         lineHeight: '1.4',
-        fontSize: '12px',
-        width: '210mm', // A4 width
-        minHeight: '297mm', // A4 height
-        maxWidth: '210mm',
+        fontSize: isDownload ? '10pt' : '12px',
+        width: isDownload ? '210mm' : '100%',
+        minHeight: isDownload ? '297mm' : 'auto',
+        maxWidth: isDownload ? '210mm' : '800px',
         margin: '0 auto',
         boxShadow: isDownload ? 'none' : '0 0 20px rgba(0,0,0,0.1)',
         position: 'relative' as const,
         pageBreakInside: 'avoid' as const,
-        overflow: 'hidden' as const
+        overflow: 'visible' as const,
+        '@media print': {
+          margin: '0',
+          padding: '15mm',
+          boxShadow: 'none'
+        }
       },
       header: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: '25px',
-        paddingBottom: '15px',
-        borderBottom: '2px solid #2563eb'
+        marginBottom: isDownload ? '20px' : '25px',
+        paddingBottom: isDownload ? '12px' : '15px',
+        borderBottom: '2px solid #4285f4'
       },
       companySection: {
         flex: 1,
         maxWidth: '48%'
       },
       companyName: {
-        fontSize: isDownload ? '20px' : '24px',
+        fontSize: isDownload ? '16pt' : '24px',
         fontWeight: 'bold',
-        color: '#2563eb',
+        color: '#4285f4',
         marginBottom: '6px',
         fontFamily: '"Arial Black", Arial, sans-serif',
-        wordWrap: 'break-word' as const
+        wordWrap: 'break-word' as const,
+        lineHeight: '1.2'
       },
       invoiceSection: {
         textAlign: 'right' as const,
@@ -64,112 +71,115 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
         maxWidth: '48%'
       },
       invoiceTitle: {
-        fontSize: isDownload ? '24px' : '28px',
+        fontSize: isDownload ? '20pt' : '28px',
         fontWeight: 'bold',
-        color: '#1f2937',
+        color: '#1a1a1a',
         marginBottom: '8px',
         fontFamily: '"Arial Black", Arial, sans-serif'
       },
       invoiceDetails: {
-        fontSize: isDownload ? '11px' : '13px',
-        color: '#374151'
+        fontSize: isDownload ? '9pt' : '13px',
+        color: '#555555',
+        lineHeight: '1.3'
       },
       clientSection: {
-        marginBottom: '20px',
-        backgroundColor: '#f8fafc',
-        padding: '15px',
-        borderRadius: '6px',
-        border: '1px solid #e2e8f0'
+        marginBottom: isDownload ? '15px' : '20px',
+        backgroundColor: '#f8f9fa',
+        padding: isDownload ? '10px' : '15px',
+        borderRadius: '4px',
+        border: '1px solid #e9ecef'
       },
       sectionTitle: {
-        fontSize: isDownload ? '14px' : '16px',
+        fontSize: isDownload ? '12pt' : '16px',
         fontWeight: 'bold',
-        color: '#1f2937',
-        marginBottom: '8px'
+        color: '#1a1a1a',
+        marginBottom: '6px'
       },
       table: {
         width: '100%',
         borderCollapse: 'collapse' as const,
-        marginBottom: '20px',
-        fontSize: isDownload ? '10px' : '12px'
+        marginBottom: isDownload ? '15px' : '20px',
+        fontSize: isDownload ? '9pt' : '12px',
+        backgroundColor: '#ffffff',
+        border: '1px solid #dee2e6'
       },
       th: {
-        backgroundColor: '#2563eb',
+        backgroundColor: '#4285f4',
         color: '#ffffff',
-        padding: isDownload ? '8px 6px' : '12px 10px',
+        padding: isDownload ? '6px 4px' : '12px 10px',
         textAlign: 'left' as const,
         fontWeight: 'bold',
-        borderBottom: '2px solid #1d4ed8',
-        fontSize: isDownload ? '10px' : '12px'
+        fontSize: isDownload ? '9pt' : '12px',
+        border: '1px solid #ffffff'
       },
       td: {
-        padding: isDownload ? '6px' : '10px',
-        borderBottom: '1px solid #e5e7eb',
+        padding: isDownload ? '4px' : '10px',
+        borderBottom: '1px solid #dee2e6',
         verticalAlign: 'top' as const,
-        fontSize: isDownload ? '10px' : '12px',
+        fontSize: isDownload ? '9pt' : '12px',
         wordWrap: 'break-word' as const,
-        maxWidth: '0',
-        overflow: 'hidden' as const
+        backgroundColor: '#ffffff',
+        color: '#000000'
       },
       totalSection: {
         display: 'flex',
         justifyContent: 'flex-end',
-        marginBottom: '20px'
+        marginBottom: isDownload ? '15px' : '20px'
       },
       totalBox: {
-        minWidth: isDownload ? '200px' : '250px',
-        backgroundColor: '#f8fafc',
-        border: '1px solid #e2e8f0',
-        borderRadius: '6px',
+        minWidth: isDownload ? '150px' : '250px',
+        backgroundColor: '#f8f9fa',
+        border: '1px solid #dee2e6',
+        borderRadius: '4px',
         overflow: 'hidden'
       },
       totalRow: {
         display: 'flex',
         justifyContent: 'space-between',
-        padding: isDownload ? '8px 12px' : '10px 15px',
-        borderBottom: '1px solid #e2e8f0',
-        fontSize: isDownload ? '11px' : '12px'
+        padding: isDownload ? '6px 8px' : '10px 15px',
+        borderBottom: '1px solid #dee2e6',
+        fontSize: isDownload ? '9pt' : '12px',
+        backgroundColor: '#ffffff'
       },
       grandTotal: {
         display: 'flex',
         justifyContent: 'space-between',
-        padding: isDownload ? '10px 12px' : '12px 15px',
-        backgroundColor: '#2563eb',
+        padding: isDownload ? '8px' : '12px 15px',
+        backgroundColor: '#4285f4',
         color: '#ffffff',
-        fontSize: isDownload ? '13px' : '15px',
+        fontSize: isDownload ? '11pt' : '15px',
         fontWeight: 'bold'
       },
       notesSection: {
-        marginBottom: '20px',
+        marginBottom: isDownload ? '15px' : '20px',
         pageBreakInside: 'avoid' as const
       },
       notesContent: {
-        backgroundColor: '#f8fafc',
-        padding: isDownload ? '10px' : '12px',
-        borderRadius: '6px',
-        border: '1px solid #e2e8f0',
-        color: '#374151',
-        fontSize: isDownload ? '10px' : '11px',
+        backgroundColor: '#f8f9fa',
+        padding: isDownload ? '8px' : '12px',
+        borderRadius: '4px',
+        border: '1px solid #dee2e6',
+        color: '#333333',
+        fontSize: isDownload ? '9pt' : '11px',
         lineHeight: '1.4',
         wordWrap: 'break-word' as const,
-        maxHeight: isDownload ? '60px' : 'auto',
-        overflow: isDownload ? 'hidden' : 'visible' as const
+        whiteSpace: 'pre-wrap' as const
       },
       footer: {
-        marginTop: '20px',
-        padding: isDownload ? '12px' : '15px',
-        backgroundColor: '#f1f5f9',
+        marginTop: isDownload ? '15px' : '20px',
+        padding: isDownload ? '10px' : '15px',
+        backgroundColor: '#f1f3f4',
         textAlign: 'center' as const,
-        color: '#64748b',
-        fontSize: isDownload ? '9px' : '11px',
-        borderRadius: '6px',
+        color: '#666666',
+        fontSize: isDownload ? '8pt' : '11px',
+        borderRadius: '4px',
         pageBreakInside: 'avoid' as const
       },
       logo: {
-        maxWidth: isDownload ? '80px' : '100px',
-        maxHeight: isDownload ? '40px' : '50px',
+        maxWidth: isDownload ? '60px' : '100px',
+        maxHeight: isDownload ? '30px' : '50px',
         objectFit: 'contain' as const,
-        marginBottom: '8px'
+        marginBottom: '6px'
       }
     };
 
@@ -177,7 +187,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       <div 
         ref={ref} 
         style={styles.container}
-        className={isDownload ? 'invoice-download' : 'invoice-preview'}
+        className={`invoice-preview ${isDownload ? 'invoice-download' : ''}`}
       >
         <div style={styles.header}>
           <div style={styles.companySection}>
@@ -185,7 +195,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
               <img src={company.logo} alt="Company Logo" style={styles.logo} />
             )}
             <h1 style={styles.companyName}>{company.name || 'Your Company Name'}</h1>
-            <div style={{ color: '#6b7280', fontSize: isDownload ? '10px' : '12px' }}>
+            <div style={{ color: '#666666', fontSize: isDownload ? '8pt' : '12px', lineHeight: '1.3' }}>
               {company.address && <div>{company.address}</div>}
               {company.city && company.zipCode && (
                 <div>{company.city}, {company.zipCode}</div>
@@ -200,10 +210,10 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
           <div style={styles.invoiceSection}>
             <h2 style={styles.invoiceTitle}>INVOICE</h2>
             <div style={styles.invoiceDetails}>
-              <div style={{ marginBottom: '6px' }}>
+              <div style={{ marginBottom: '4px' }}>
                 <strong>Invoice #:</strong> {invoice.invoiceNumber}
               </div>
-              <div style={{ marginBottom: '6px' }}>
+              <div style={{ marginBottom: '4px' }}>
                 <strong>Issue Date:</strong> {new Date(invoice.issueDate).toLocaleDateString()}
               </div>
               <div>
@@ -215,15 +225,15 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
 
         <div style={styles.clientSection}>
           <h3 style={styles.sectionTitle}>Bill To:</h3>
-          <div style={{ fontSize: isDownload ? '11px' : '13px' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '3px' }}>{invoice.client.name}</div>
-            {invoice.client.company && <div style={{ marginBottom: '3px' }}>{invoice.client.company}</div>}
-            {invoice.client.address && <div style={{ marginBottom: '3px' }}>{invoice.client.address}</div>}
+          <div style={{ fontSize: isDownload ? '9pt' : '13px', lineHeight: '1.3' }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{invoice.client.name}</div>
+            {invoice.client.company && <div style={{ marginBottom: '2px' }}>{invoice.client.company}</div>}
+            {invoice.client.address && <div style={{ marginBottom: '2px' }}>{invoice.client.address}</div>}
             {invoice.client.city && invoice.client.zipCode && (
-              <div style={{ marginBottom: '3px' }}>{invoice.client.city}, {invoice.client.zipCode}</div>
+              <div style={{ marginBottom: '2px' }}>{invoice.client.city}, {invoice.client.zipCode}</div>
             )}
-            {invoice.client.country && <div style={{ marginBottom: '3px' }}>{invoice.client.country}</div>}
-            <div style={{ marginBottom: '3px' }}>Email: {invoice.client.email}</div>
+            {invoice.client.country && <div style={{ marginBottom: '2px' }}>{invoice.client.country}</div>}
+            <div style={{ marginBottom: '2px' }}>Email: {invoice.client.email}</div>
             {invoice.client.phone && <div>Phone: {invoice.client.phone}</div>}
           </div>
         </div>
@@ -248,11 +258,8 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
                   <td style={styles.td}>
                     <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{item.description}</div>
                     {item.details && (
-                      <div style={{ fontSize: isDownload ? '9px' : '10px', color: '#6b7280' }}>
-                        {isDownload && item.details.length > 50 ? 
-                          `${item.details.substring(0, 50)}...` : 
-                          item.details
-                        }
+                      <div style={{ fontSize: isDownload ? '8pt' : '10px', color: '#666666' }}>
+                        {item.details}
                       </div>
                     )}
                   </td>
@@ -278,7 +285,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
               </div>
             )}
             {invoice.discount > 0 && (
-              <div style={{ ...styles.totalRow, color: '#dc2626' }}>
+              <div style={{ ...styles.totalRow, color: '#dc3545' }}>
                 <span>Discount:</span>
                 <span>-${formatCurrency(invoice.discount)}</span>
               </div>
@@ -294,18 +301,15 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
           <div style={styles.notesSection}>
             <h3 style={styles.sectionTitle}>Notes:</h3>
             <div style={styles.notesContent}>
-              {isDownload && invoice.notes.length > 200 ? 
-                `${invoice.notes.substring(0, 200)}...` : 
-                invoice.notes
-              }
+              {invoice.notes}
             </div>
           </div>
         )}
 
         <div style={styles.footer}>
-          <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>Thank you for your business!</div>
-          <div style={{ marginBottom: '6px' }}>We appreciate your partnership and look forward to serving you again.</div>
-          <div style={{ fontSize: isDownload ? '8px' : '10px', marginTop: '8px' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Thank you for your business!</div>
+          <div style={{ marginBottom: '4px' }}>We appreciate your partnership and look forward to serving you again.</div>
+          <div style={{ fontSize: isDownload ? '7pt' : '10px', marginTop: '6px' }}>
             This invoice was generated electronically and is valid without signature.
           </div>
         </div>

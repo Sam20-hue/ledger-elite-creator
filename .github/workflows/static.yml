@@ -53,6 +53,12 @@ jobs:
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
         
+      - name: Create CNAME file if needed
+        run: |
+          if [ ! -z "${{ secrets.CUSTOM_DOMAIN }}" ]; then
+            echo "${{ secrets.CUSTOM_DOMAIN }}" > dist/CNAME
+          fi
+        
       - name: Setup Pages
         uses: actions/configure-pages@v5
         
