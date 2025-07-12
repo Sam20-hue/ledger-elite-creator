@@ -1,4 +1,3 @@
-
 import React, { forwardRef } from 'react';
 import { Invoice } from '@/types/invoice';
 import { useInvoice } from '@/contexts/InvoiceContext';
@@ -36,8 +35,8 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
         margin: '0 auto',
         boxShadow: isDownload ? 'none' : '0 0 20px rgba(0,0,0,0.1)',
         position: 'relative' as const,
-        pageBreakInside: 'avoid',
-        overflow: 'hidden'
+        pageBreakInside: 'avoid' as const,
+        overflow: 'hidden' as const
       },
       header: {
         display: 'flex',
@@ -142,7 +141,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       },
       notesSection: {
         marginBottom: '20px',
-        pageBreakInside: 'avoid'
+        pageBreakInside: 'avoid' as const
       },
       notesContent: {
         backgroundColor: '#f8fafc',
@@ -164,7 +163,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
         color: '#64748b',
         fontSize: isDownload ? '9px' : '11px',
         borderRadius: '6px',
-        pageBreakInside: 'avoid'
+        pageBreakInside: 'avoid' as const
       },
       logo: {
         maxWidth: isDownload ? '80px' : '100px',
