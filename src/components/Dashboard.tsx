@@ -24,7 +24,16 @@ const Dashboard = () => {
     .filter(inv => inv.status === 'sent')
     .reduce((sum, inv) => sum + inv.total, 0);
 
-  const totalBankBalance = bankAccounts.reduce((sum, account) => sum + account.balance, 0);
+  // Separate bank balances by currency
+  const kesAccounts = bankAccounts.filter(account => 
+    account.currency === 'KES' || account.currency === 'Kenyan Shilling'
+  );
+  const usdAccounts = bankAccounts.filter(account => 
+    account.currency === 'USD' || account.currency === 'US Dollar'
+  );
+  
+  const totalKesBalance = kesAccounts.reduce((sum, account) => sum + account.balance, 0);
+  const totalUsdBalance = usdAccounts.reduce((sum, account) => sum + account.balance, 0);
 
   const overdueInvoices = invoices.filter(inv => {
     const dueDate = new Date(inv.dueDate);
@@ -49,14 +58,14 @@ const Dashboard = () => {
   return (
     <div className="space-y-3 sm:space-y-4 lg:space-y-6 p-1 sm:p-2 lg:p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Numera Dashboard</h1>
         <Link to="/invoices/new">
           <Button size="sm" className="w-full sm:w-auto text-xs sm:text-sm">Create New Invoice</Button>
         </Link>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-6">
         <Card className="save-animation">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium">Total Revenue</CardTitle>
@@ -81,12 +90,23 @@ const Dashboard = () => {
 
         <Card className="save-animation">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Bank Balance</CardTitle>
-            <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">KES Balance</CardTitle>
+            <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
           </CardHeader>
           <CardContent className="pb-2">
-            <div className="text-lg sm:text-xl lg:text-2xl font-bold">${totalBankBalance.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Total in all accounts</p>
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">KSh {totalKesBalance.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">Kenyan Shilling accounts</p>
+          </CardContent>
+        </Card>
+
+        <Card className="save-animation">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">USD Balance</CardTitle>
+            <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent className="pb-2">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">${totalUsdBalance.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">US Dollar accounts</p>
           </CardContent>
         </Card>
 
@@ -155,7 +175,10 @@ const Dashboard = () => {
                       <p className="text-xs text-muted-foreground truncate">{account.bankName}</p>
                     </div>
                     <div className="flex flex-row sm:flex-col items-center sm:items-end space-x-2 sm:space-x-0 sm:space-y-1">
-                      <p className="font-medium text-sm">${account.balance.toFixed(2)}</p>
+                      <p className="font-medium text-sm">
+                        {account.currency === 'KES' || account.currency === 'Kenyan Shilling' ? 'KSh' : '$'} 
+                        {account.balance.toFixed(2)}
+                      </p>
                       <p className="text-xs text-muted-foreground capitalize">{account.accountType}</p>
                     </div>
                   </div>

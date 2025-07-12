@@ -26,13 +26,13 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       container: {
         backgroundColor: '#ffffff',
         color: '#000000',
-        padding: isDownload ? '15mm' : '40px',
+        padding: isDownload ? '10mm' : '40px',
         fontFamily: '"Arial", "Helvetica", sans-serif',
-        lineHeight: '1.4',
-        fontSize: isDownload ? '10pt' : '12px',
-        width: isDownload ? '210mm' : '100%',
-        minHeight: isDownload ? '297mm' : 'auto',
-        maxWidth: isDownload ? '210mm' : '800px',
+        lineHeight: '1.3',
+        fontSize: isDownload ? '9pt' : '12px',
+        width: isDownload ? '190mm' : '100%',
+        minHeight: isDownload ? '277mm' : 'auto',
+        maxWidth: isDownload ? '190mm' : '800px',
         margin: '0 auto',
         boxShadow: isDownload ? 'none' : '0 0 20px rgba(0,0,0,0.1)',
         position: 'relative' as const,
@@ -40,57 +40,79 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
         overflow: 'visible' as const,
         '@media print': {
           margin: '0',
-          padding: '15mm',
-          boxShadow: 'none'
+          padding: '10mm',
+          boxShadow: 'none',
+          width: '190mm',
+          minHeight: '277mm'
         }
       },
       header: {
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: isDownload ? '20px' : '25px',
-        paddingBottom: isDownload ? '12px' : '15px',
-        borderBottom: '2px solid #4285f4'
+        flexDirection: 'column' as const,
+        alignItems: 'center',
+        marginBottom: isDownload ? '15px' : '25px',
+        paddingBottom: isDownload ? '10px' : '15px',
+        borderBottom: '2px solid #4285f4',
+        textAlign: 'center' as const
+      },
+      logoContainer: {
+        marginBottom: '10px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      },
+      logo: {
+        maxWidth: isDownload ? '80px' : '120px',
+        maxHeight: isDownload ? '40px' : '60px',
+        objectFit: 'contain' as const
       },
       companySection: {
-        flex: 1,
-        maxWidth: '48%'
+        marginBottom: '15px',
+        textAlign: 'center' as const
       },
       companyName: {
-        fontSize: isDownload ? '16pt' : '24px',
+        fontSize: isDownload ? '14pt' : '20px',
         fontWeight: 'bold',
         color: '#4285f4',
-        marginBottom: '6px',
-        fontFamily: '"Arial Black", Arial, sans-serif',
-        wordWrap: 'break-word' as const,
-        lineHeight: '1.2'
+        marginBottom: '8px',
+        fontFamily: '"Arial Black", Arial, sans-serif'
       },
       invoiceSection: {
-        textAlign: 'right' as const,
-        flex: 1,
-        maxWidth: '48%'
+        textAlign: 'center' as const,
+        marginBottom: '10px'
       },
       invoiceTitle: {
-        fontSize: isDownload ? '20pt' : '28px',
+        fontSize: isDownload ? '18pt' : '24px',
         fontWeight: 'bold',
         color: '#1a1a1a',
         marginBottom: '8px',
         fontFamily: '"Arial Black", Arial, sans-serif'
       },
       invoiceDetails: {
-        fontSize: isDownload ? '9pt' : '13px',
+        fontSize: isDownload ? '8pt' : '12px',
         color: '#555555',
         lineHeight: '1.3'
       },
+      contentGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: isDownload ? '15px' : '20px',
+        marginBottom: isDownload ? '15px' : '20px'
+      },
       clientSection: {
-        marginBottom: isDownload ? '15px' : '20px',
         backgroundColor: '#f8f9fa',
-        padding: isDownload ? '10px' : '15px',
+        padding: isDownload ? '8px' : '12px',
+        borderRadius: '4px',
+        border: '1px solid #e9ecef'
+      },
+      companyInfoSection: {
+        backgroundColor: '#f8f9fa',
+        padding: isDownload ? '8px' : '12px',
         borderRadius: '4px',
         border: '1px solid #e9ecef'
       },
       sectionTitle: {
-        fontSize: isDownload ? '12pt' : '16px',
+        fontSize: isDownload ? '10pt' : '14px',
         fontWeight: 'bold',
         color: '#1a1a1a',
         marginBottom: '6px'
@@ -98,25 +120,25 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       table: {
         width: '100%',
         borderCollapse: 'collapse' as const,
-        marginBottom: isDownload ? '15px' : '20px',
-        fontSize: isDownload ? '9pt' : '12px',
+        marginBottom: isDownload ? '12px' : '16px',
+        fontSize: isDownload ? '8pt' : '11px',
         backgroundColor: '#ffffff',
         border: '1px solid #dee2e6'
       },
       th: {
         backgroundColor: '#4285f4',
         color: '#ffffff',
-        padding: isDownload ? '6px 4px' : '12px 10px',
+        padding: isDownload ? '4px 3px' : '8px 6px',
         textAlign: 'left' as const,
         fontWeight: 'bold',
-        fontSize: isDownload ? '9pt' : '12px',
+        fontSize: isDownload ? '8pt' : '11px',
         border: '1px solid #ffffff'
       },
       td: {
-        padding: isDownload ? '4px' : '10px',
+        padding: isDownload ? '3px' : '6px',
         borderBottom: '1px solid #dee2e6',
         verticalAlign: 'top' as const,
-        fontSize: isDownload ? '9pt' : '12px',
+        fontSize: isDownload ? '8pt' : '11px',
         wordWrap: 'break-word' as const,
         backgroundColor: '#ffffff',
         color: '#000000'
@@ -124,10 +146,10 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       totalSection: {
         display: 'flex',
         justifyContent: 'flex-end',
-        marginBottom: isDownload ? '15px' : '20px'
+        marginBottom: isDownload ? '12px' : '16px'
       },
       totalBox: {
-        minWidth: isDownload ? '150px' : '250px',
+        minWidth: isDownload ? '120px' : '200px',
         backgroundColor: '#f8f9fa',
         border: '1px solid #dee2e6',
         borderRadius: '4px',
@@ -136,50 +158,44 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       totalRow: {
         display: 'flex',
         justifyContent: 'space-between',
-        padding: isDownload ? '6px 8px' : '10px 15px',
+        padding: isDownload ? '4px 6px' : '8px 12px',
         borderBottom: '1px solid #dee2e6',
-        fontSize: isDownload ? '9pt' : '12px',
+        fontSize: isDownload ? '8pt' : '11px',
         backgroundColor: '#ffffff'
       },
       grandTotal: {
         display: 'flex',
         justifyContent: 'space-between',
-        padding: isDownload ? '8px' : '12px 15px',
+        padding: isDownload ? '6px' : '10px 12px',
         backgroundColor: '#4285f4',
         color: '#ffffff',
-        fontSize: isDownload ? '11pt' : '15px',
+        fontSize: isDownload ? '10pt' : '13px',
         fontWeight: 'bold'
       },
       notesSection: {
-        marginBottom: isDownload ? '15px' : '20px',
+        marginBottom: isDownload ? '12px' : '16px',
         pageBreakInside: 'avoid' as const
       },
       notesContent: {
         backgroundColor: '#f8f9fa',
-        padding: isDownload ? '8px' : '12px',
+        padding: isDownload ? '6px' : '10px',
         borderRadius: '4px',
         border: '1px solid #dee2e6',
         color: '#333333',
-        fontSize: isDownload ? '9pt' : '11px',
+        fontSize: isDownload ? '8pt' : '10px',
         lineHeight: '1.4',
         wordWrap: 'break-word' as const,
         whiteSpace: 'pre-wrap' as const
       },
       footer: {
-        marginTop: isDownload ? '15px' : '20px',
-        padding: isDownload ? '10px' : '15px',
+        marginTop: isDownload ? '12px' : '16px',
+        padding: isDownload ? '8px' : '12px',
         backgroundColor: '#f1f3f4',
         textAlign: 'center' as const,
         color: '#666666',
-        fontSize: isDownload ? '8pt' : '11px',
+        fontSize: isDownload ? '7pt' : '10px',
         borderRadius: '4px',
         pageBreakInside: 'avoid' as const
-      },
-      logo: {
-        maxWidth: isDownload ? '60px' : '100px',
-        maxHeight: isDownload ? '30px' : '50px',
-        objectFit: 'contain' as const,
-        marginBottom: '6px'
       }
     };
 
@@ -190,30 +206,21 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
         className={`invoice-preview ${isDownload ? 'invoice-download' : ''}`}
       >
         <div style={styles.header}>
-          <div style={styles.companySection}>
-            {company.logo && (
+          {company.logo && (
+            <div style={styles.logoContainer}>
               <img src={company.logo} alt="Company Logo" style={styles.logo} />
-            )}
-            <h1 style={styles.companyName}>{company.name || 'Your Company Name'}</h1>
-            <div style={{ color: '#666666', fontSize: isDownload ? '8pt' : '12px', lineHeight: '1.3' }}>
-              {company.address && <div>{company.address}</div>}
-              {company.city && company.zipCode && (
-                <div>{company.city}, {company.zipCode}</div>
-              )}
-              {company.country && <div>{company.country}</div>}
-              {company.phone && <div>Phone: {company.phone}</div>}
-              {company.email && <div>Email: {company.email}</div>}
-              {company.website && <div>Website: {company.website}</div>}
-              {company.taxId && <div>Tax ID: {company.taxId}</div>}
             </div>
+          )}
+          <div style={styles.companySection}>
+            <h1 style={styles.companyName}>{company.name || 'Your Company Name'}</h1>
           </div>
           <div style={styles.invoiceSection}>
             <h2 style={styles.invoiceTitle}>INVOICE</h2>
             <div style={styles.invoiceDetails}>
-              <div style={{ marginBottom: '4px' }}>
+              <div style={{ marginBottom: '3px' }}>
                 <strong>Invoice #:</strong> {invoice.invoiceNumber}
               </div>
-              <div style={{ marginBottom: '4px' }}>
+              <div style={{ marginBottom: '3px' }}>
                 <strong>Issue Date:</strong> {new Date(invoice.issueDate).toLocaleDateString()}
               </div>
               <div>
@@ -223,18 +230,35 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
           </div>
         </div>
 
-        <div style={styles.clientSection}>
-          <h3 style={styles.sectionTitle}>Bill To:</h3>
-          <div style={{ fontSize: isDownload ? '9pt' : '13px', lineHeight: '1.3' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{invoice.client.name}</div>
-            {invoice.client.company && <div style={{ marginBottom: '2px' }}>{invoice.client.company}</div>}
-            {invoice.client.address && <div style={{ marginBottom: '2px' }}>{invoice.client.address}</div>}
-            {invoice.client.city && invoice.client.zipCode && (
-              <div style={{ marginBottom: '2px' }}>{invoice.client.city}, {invoice.client.zipCode}</div>
-            )}
-            {invoice.client.country && <div style={{ marginBottom: '2px' }}>{invoice.client.country}</div>}
-            <div style={{ marginBottom: '2px' }}>Email: {invoice.client.email}</div>
-            {invoice.client.phone && <div>Phone: {invoice.client.phone}</div>}
+        <div style={styles.contentGrid}>
+          <div style={styles.clientSection}>
+            <h3 style={styles.sectionTitle}>Bill To:</h3>
+            <div style={{ fontSize: isDownload ? '8pt' : '12px', lineHeight: '1.3' }}>
+              <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{invoice.client.name}</div>
+              {invoice.client.company && <div style={{ marginBottom: '2px' }}>{invoice.client.company}</div>}
+              {invoice.client.address && <div style={{ marginBottom: '2px' }}>{invoice.client.address}</div>}
+              {invoice.client.city && invoice.client.zipCode && (
+                <div style={{ marginBottom: '2px' }}>{invoice.client.city}, {invoice.client.zipCode}</div>
+              )}
+              {invoice.client.country && <div style={{ marginBottom: '2px' }}>{invoice.client.country}</div>}
+              <div style={{ marginBottom: '2px' }}>Email: {invoice.client.email}</div>
+              {invoice.client.phone && <div>Phone: {invoice.client.phone}</div>}
+            </div>
+          </div>
+
+          <div style={styles.companyInfoSection}>
+            <h3 style={styles.sectionTitle}>From:</h3>
+            <div style={{ fontSize: isDownload ? '8pt' : '12px', lineHeight: '1.3' }}>
+              {company.address && <div style={{ marginBottom: '2px' }}>{company.address}</div>}
+              {company.city && company.zipCode && (
+                <div style={{ marginBottom: '2px' }}>{company.city}, {company.zipCode}</div>
+              )}
+              {company.country && <div style={{ marginBottom: '2px' }}>{company.country}</div>}
+              {company.phone && <div style={{ marginBottom: '2px' }}>Phone: {company.phone}</div>}
+              {company.email && <div style={{ marginBottom: '2px' }}>Email: {company.email}</div>}
+              {company.website && <div style={{ marginBottom: '2px' }}>Website: {company.website}</div>}
+              {company.taxId && <div>Tax ID: {company.taxId}</div>}
+            </div>
           </div>
         </div>
 
@@ -258,7 +282,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
                   <td style={styles.td}>
                     <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{item.description}</div>
                     {item.details && (
-                      <div style={{ fontSize: isDownload ? '8pt' : '10px', color: '#666666' }}>
+                      <div style={{ fontSize: isDownload ? '7pt' : '9px', color: '#666666' }}>
                         {item.details}
                       </div>
                     )}
@@ -309,7 +333,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
         <div style={styles.footer}>
           <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Thank you for your business!</div>
           <div style={{ marginBottom: '4px' }}>We appreciate your partnership and look forward to serving you again.</div>
-          <div style={{ fontSize: isDownload ? '7pt' : '10px', marginTop: '6px' }}>
+          <div style={{ fontSize: isDownload ? '6pt' : '9px', marginTop: '6px' }}>
             This invoice was generated electronically and is valid without signature.
           </div>
         </div>
