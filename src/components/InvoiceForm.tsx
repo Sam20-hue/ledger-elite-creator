@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -106,6 +105,12 @@ const InvoiceForm = () => {
       const invoice = invoices.find(inv => inv.id === id);
       if (invoice) {
         setIsEditing(true);
+        
+        // Load existing field selections if available
+        if (invoice.selectedFields) {
+          setSelectedFields(invoice.selectedFields);
+        }
+        
         reset({
           clientId: invoice.clientId,
           issueDate: invoice.issueDate,
@@ -172,13 +177,19 @@ const InvoiceForm = () => {
   };
 
   const handleFieldChange = (section: string, field: string, checked: boolean) => {
-    setSelectedFields(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section as keyof typeof prev],
-        [field]: checked,
-      },
-    }));
+    console.log('Field change:', section, field, checked); // Debug log
+    
+    setSelectedFields(prev => {
+      const newFields = {
+        ...prev,
+        [section]: {
+          ...prev[section as keyof typeof prev],
+          [field]: checked,
+        },
+      };
+      console.log('New selected fields:', newFields); // Debug log
+      return newFields;
+    });
   };
 
   const onSubmit = async (data: InvoiceFormData) => {
@@ -256,7 +267,8 @@ const InvoiceForm = () => {
         status: 'sent',
         notes: data.notes,
         createdAt: isEditing ? invoices.find(inv => inv.id === id)!.createdAt : new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        selectedFields,
       };
       
       await sendInvoiceEmail(invoiceData);
@@ -291,7 +303,7 @@ const InvoiceForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="client">Client *</Label>
-                <Select onValueChange={(value) => setValue('clientId', value)}>
+                <Select onValueChange={(value) => setValue('clientId', value)} value={watchedItems.length > 0 ? undefined : ''}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>

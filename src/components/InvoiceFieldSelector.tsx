@@ -87,6 +87,18 @@ const InvoiceFieldSelector: React.FC<InvoiceFieldSelectorProps> = ({
     },
   ];
 
+  const handleFieldChange = (sectionKey: string, fieldKey: string, checked: boolean | string) => {
+    // Ensure checked is always a boolean
+    const isChecked = checked === true || checked === 'true';
+    onFieldChange(sectionKey, fieldKey, isChecked);
+  };
+
+  const getFieldValue = (sectionKey: string, fieldKey: string): boolean => {
+    const section = selectedFields[sectionKey as keyof typeof selectedFields];
+    if (!section) return false;
+    return section[fieldKey as keyof typeof section] || false;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -97,20 +109,28 @@ const InvoiceFieldSelector: React.FC<InvoiceFieldSelectorProps> = ({
           <div key={section.key} className="space-y-2">
             <h4 className="text-xs font-medium text-muted-foreground">{section.title}</h4>
             <div className="grid grid-cols-2 gap-2">
-              {section.fields.map((field) => (
-                <div key={field.key} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`${section.key}-${field.key}`}
-                    checked={selectedFields[section.key as keyof typeof selectedFields][field.key as keyof any]}
-                    onCheckedChange={(checked) =>
-                      onFieldChange(section.key, field.key, checked as boolean)
-                    }
-                  />
-                  <Label htmlFor={`${section.key}-${field.key}`} className="text-xs">
-                    {field.label}
-                  </Label>
-                </div>
-              ))}
+              {section.fields.map((field) => {
+                const isChecked = getFieldValue(section.key, field.key);
+                const checkboxId = `${section.key}-${field.key}`;
+                
+                return (
+                  <div key={field.key} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={checkboxId}
+                      checked={isChecked}
+                      onCheckedChange={(checked) =>
+                        handleFieldChange(section.key, field.key, checked)
+                      }
+                    />
+                    <Label 
+                      htmlFor={checkboxId} 
+                      className="text-xs cursor-pointer"
+                    >
+                      {field.label}
+                    </Label>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}
