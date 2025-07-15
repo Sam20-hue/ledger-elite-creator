@@ -11,11 +11,22 @@ const NotFound = () => {
   // Check if we're on a valid route that should exist (like invoice preview)
   React.useEffect(() => {
     const path = window.location.pathname;
+    
+    // Don't redirect if we're on the login page
+    if (path === '/login') {
+      return;
+    }
+    
     if (path.includes('/invoices/') && path.includes('/preview')) {
       // This might be a valid invoice preview route, redirect to home and let routing handle it
       window.location.href = '/';
     }
   }, []);
+
+  // If we're on the login page, don't show the 404 page
+  if (window.location.pathname === '/login') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
