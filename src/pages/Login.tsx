@@ -122,11 +122,6 @@ const Login = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            <p>Demo credentials:</p>
-            <p>Admin: amayamusamson@gmail.com</p>
-            <p>Password: 1029384756</p>
-          </div>
         </CardContent>
       </Card>
     </div>
