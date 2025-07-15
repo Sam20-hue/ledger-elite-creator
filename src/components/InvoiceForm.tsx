@@ -106,9 +106,39 @@ const InvoiceForm = () => {
       if (invoice) {
         setIsEditing(true);
         
-        // Load existing field selections if available
+        // Load existing field selections if available with proper type handling
         if (invoice.selectedFields) {
-          setSelectedFields(invoice.selectedFields);
+          setSelectedFields(prev => ({
+            company: {
+              logo: invoice.selectedFields?.company?.logo ?? prev.company.logo,
+              name: invoice.selectedFields?.company?.name ?? prev.company.name,
+              address: invoice.selectedFields?.company?.address ?? prev.company.address,
+              city: invoice.selectedFields?.company?.city ?? prev.company.city,
+              zipCode: invoice.selectedFields?.company?.zipCode ?? prev.company.zipCode,
+              country: invoice.selectedFields?.company?.country ?? prev.company.country,
+              phone: invoice.selectedFields?.company?.phone ?? prev.company.phone,
+              email: invoice.selectedFields?.company?.email ?? prev.company.email,
+              website: invoice.selectedFields?.company?.website ?? prev.company.website,
+              taxId: invoice.selectedFields?.company?.taxId ?? prev.company.taxId,
+            },
+            client: {
+              name: invoice.selectedFields?.client?.name ?? prev.client.name,
+              address: invoice.selectedFields?.client?.address ?? prev.client.address,
+              city: invoice.selectedFields?.client?.city ?? prev.client.city,
+              zipCode: invoice.selectedFields?.client?.zipCode ?? prev.client.zipCode,
+              country: invoice.selectedFields?.client?.country ?? prev.client.country,
+              email: invoice.selectedFields?.client?.email ?? prev.client.email,
+              phone: invoice.selectedFields?.client?.phone ?? prev.client.phone,
+            },
+            invoice: {
+              invoiceNumber: invoice.selectedFields?.invoice?.invoiceNumber ?? prev.invoice.invoiceNumber,
+              issueDate: invoice.selectedFields?.invoice?.issueDate ?? prev.invoice.issueDate,
+              dueDate: invoice.selectedFields?.invoice?.dueDate ?? prev.invoice.dueDate,
+              notes: invoice.selectedFields?.invoice?.notes ?? prev.invoice.notes,
+              currency: invoice.selectedFields?.invoice?.currency ?? prev.invoice.currency,
+              taxRate: invoice.selectedFields?.invoice?.taxRate ?? prev.invoice.taxRate,
+            },
+          }));
         }
         
         reset({
