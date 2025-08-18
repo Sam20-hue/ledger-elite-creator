@@ -95,11 +95,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!adminExists) {
       const adminUser = {
         id: 'admin-1',
-        name: 'Admin User',
+        name: 'Amaya Musamson',
         email: 'amayamusamson@gmail.com',
-        password: '1029384756',
+        password: 'Numera@Sam20',
         createdAt: new Date().toISOString(),
-        permissions: ['dashboard', 'invoices', 'clients', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service', 'company', 'integrations', 'settings', 'admin', 'inventory'],
+        permissions: ['dashboard', 'invoices', 'clients', 'financial-reports', 'bank-accounts', 'payments', 'payment-initiation', 'email-service', 'company', 'integrations', 'settings', 'admin', 'inventory', 'users', 'hr'],
         role: 'admin'
       };
       registeredUsers.push(adminUser);
@@ -165,7 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return false;
     }
 
-    if (email === 'amayamusamson@gmail.com' && password === '1029384756') {
+    if (email === 'amayamusamson@gmail.com' && password === 'Numera@Sam20') {
       resetLoginAttempts();
       sessionStorage.setItem('userRole', 'admin');
       sessionStorage.setItem('isLoggedIn', 'true');
@@ -178,7 +178,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers') || '[]');
       const existingUser = onlineUsers.find((u: any) => u.email === email);
       if (!existingUser) {
-        onlineUsers.push({ email, name: 'Admin User', loginTime: new Date().toISOString() });
+        onlineUsers.push({ email, name: 'Amaya Musamson', loginTime: new Date().toISOString() });
         localStorage.setItem('onlineUsers', JSON.stringify(onlineUsers));
       }
       

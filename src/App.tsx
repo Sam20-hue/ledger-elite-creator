@@ -25,6 +25,8 @@ import IntegrationsPage from './components/IntegrationsPage';
 import SettingsPage from './components/SettingsPage';
 import FreezeSettings from './components/FreezeSettings';
 import Admin from './pages/Admin';
+import UserManagement from './components/UserManagement';
+import HRManagement from './components/HRManagement';
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
@@ -121,8 +123,18 @@ function App() {
                         <FreezeSettings />
                       </ProtectedRoute>
                     } />
+                    <Route path="/users" element={
+                      <ProtectedRoute requiredPermission="users">
+                        <UserManagement />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/hr" element={
+                      <ProtectedRoute requiredPermission="hr">
+                        <HRManagement />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/admin" element={
-                      <ProtectedRoute>
+                      <ProtectedRoute requiredPermission="admin">
                         <Admin />
                       </ProtectedRoute>
                     } />

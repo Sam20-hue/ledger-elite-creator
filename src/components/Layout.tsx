@@ -66,7 +66,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     }
     
     if (currentUser === 'amayamusamson@gmail.com') {
-      return 'Admin User';
+      return 'Amaya Musamson';
     }
     
     return currentUser.split('@')[0];
@@ -101,8 +101,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Settings', href: '/settings', icon: Settings, requiresAuth: true, permission: 'settings' },
   ];
 
-  const adminNavigation = [
-    { name: 'Admin Panel', href: '/admin', icon: UserCog },
+  const managementNavigation = [
+    { name: 'Users', href: '/users', icon: Users, permission: 'users' },
+    { name: 'HR', href: '/hr', icon: Briefcase, permission: 'hr' },
+    { name: 'Admin Panel', href: '/admin', icon: UserCog, permission: 'admin' },
   ];
 
   const AppSidebar = () => (
@@ -151,7 +153,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 );
               })}
               
-              {userRole === 'admin' && adminNavigation.map((item) => {
+              {managementNavigation.map((item) => {
+                if (!hasAccess(item.permission)) return null;
+                
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
                 
