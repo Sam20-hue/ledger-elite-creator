@@ -294,22 +294,72 @@ const BankAccounts = () => {
         </div>
       </div>
 
-      {/* Currency Summary Cards */}
-      {Object.keys(groupedAccounts).map(currency => (
-        <Card key={currency}>
+      {/* Portfolio Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-green-100 rounded-full">
-                <DollarSign className="h-8 w-8 text-green-600" />
-              </div>
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Balance ({currency})</p>
+                <p className="text-primary-foreground/70 text-sm font-medium">Total Portfolio</p>
                 <p className="text-3xl font-bold">
-                  {currency === 'USD' ? '$' : currency + ' '}{getTotalByCurrency(currency).toFixed(2)}
+                  ${(Object.values(groupedAccounts).flat() as any[]).reduce((sum: number, acc: any) => {
+                    const rate = acc.currency === 'USD' ? 1 : 0.0072; // Example conversion rates
+                    return sum + (acc.balance * rate);
+                  }, 0).toFixed(2)}
                 </p>
+              </div>
+              <div className="p-3 bg-primary-foreground/20 rounded-full">
+                <Building2 className="h-6 w-6" />
               </div>
             </div>
           </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-muted-foreground text-sm font-medium">Active Accounts</p>
+                <p className="text-3xl font-bold">{accounts.length}</p>
+              </div>
+              <div className="p-3 bg-blue-100 rounded-full">
+                <CreditCard className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-muted-foreground text-sm font-medium">Currencies</p>
+                <p className="text-3xl font-bold">{Object.keys(groupedAccounts).length}</p>
+              </div>
+              <div className="p-3 bg-green-100 rounded-full">
+                <DollarSign className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Currency Breakdown */}
+      {Object.keys(groupedAccounts).map(currency => (
+        <Card key={currency} className="mb-4">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold">{currency} Portfolio</CardTitle>
+              <div className="text-right">
+                <p className="text-2xl font-bold">
+                  {currency === 'USD' ? '$' : currency + ' '}{getTotalByCurrency(currency).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {groupedAccounts[currency].length} account{groupedAccounts[currency].length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+          </CardHeader>
         </Card>
       ))}
 

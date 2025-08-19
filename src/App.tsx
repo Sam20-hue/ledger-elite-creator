@@ -26,7 +26,7 @@ import SettingsPage from './components/SettingsPage';
 import FreezeSettings from './components/FreezeSettings';
 import Admin from './pages/Admin';
 import UserManagement from './components/UserManagement';
-import HRManagement from './components/HRManagement';
+import EmployeePortal from './components/EmployeePortal';
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
@@ -130,7 +130,7 @@ function App() {
                     } />
                     <Route path="/hr" element={
                       <ProtectedRoute requiredPermission="hr">
-                        <HRManagement />
+                        <EmployeePortal />
                       </ProtectedRoute>
                     } />
                     <Route path="/admin" element={

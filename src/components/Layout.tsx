@@ -103,7 +103,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const managementNavigation = [
     { name: 'Users', href: '/users', icon: Users, permission: 'users' },
-    { name: 'HR', href: '/hr', icon: Briefcase, permission: 'hr' },
+    { name: 'HR', href: '/hr', icon: Briefcase, permission: 'hr', newTab: true },
     { name: 'Admin Panel', href: '/admin', icon: UserCog, permission: 'admin' },
   ];
 
@@ -162,14 +162,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link 
-                        to={item.href} 
-                        className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground p-2 rounded text-sm" 
-                        title={sidebarCollapsed ? item.name : ''}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {!sidebarCollapsed && <span>{item.name}</span>}
-                      </Link>
+                      {item.newTab ? (
+                        <a 
+                          href={item.href} 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground p-2 rounded text-sm" 
+                          title={sidebarCollapsed ? item.name : ''}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {!sidebarCollapsed && <span>{item.name}</span>}
+                        </a>
+                      ) : (
+                        <Link 
+                          to={item.href} 
+                          className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground p-2 rounded text-sm" 
+                          title={sidebarCollapsed ? item.name : ''}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {!sidebarCollapsed && <span>{item.name}</span>}
+                        </Link>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
