@@ -1,35 +1,32 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredPermission?: string;
+  requiredRole?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredPermission }) => {
-  const { isLoggedIn, userRole, currentUser } = useAuth();
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
+  const { user, loading } = useSupabaseAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login');
-      return;
+    if (!loading && !user) {
+      navigate('/auth');
     }
+  }, [user, loading, navigate]);
 
-    if (requiredPermission && userRole !== 'admin') {
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const user = registeredUsers.find((u: any) => u.email === currentUser);
-      
-      if (!user || !user.permissions || !user.permissions.includes(requiredPermission)) {
-        navigate('/');
-        return;
-      }
-    }
-  }, [isLoggedIn, userRole, currentUser, requiredPermission, navigate]);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
-  if (!isLoggedIn) {
+  if (!user) {
     return null;
   }
 
