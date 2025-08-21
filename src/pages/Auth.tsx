@@ -69,8 +69,8 @@ const Auth: React.FC = () => {
           });
         } else if (error.message.includes('Invalid login credentials')) {
           toast({
-            title: "Invalid Credentials",
-            description: "Please check your email and password and try again.",
+            title: "Login Failed", 
+            description: "Please verify your email first by clicking the link we sent you, then try logging in again.",
             variant: "destructive",
           });
         } else {
@@ -193,7 +193,13 @@ const Auth: React.FC = () => {
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Ledger Elite Creator</CardTitle>
-          <CardDescription>Access your business management platform</CardDescription>
+          <CardDescription>
+            Access your business management platform
+            <br />
+            <small className="text-xs text-muted-foreground">
+              After signup, check your email and verify before logging in
+            </small>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
