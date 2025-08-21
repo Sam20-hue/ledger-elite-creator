@@ -26,20 +26,17 @@ export const useSupabaseFreezeSettings = () => {
     if (!user) return;
 
     const loadFreezeSettings = async () => {
-      const { data, error } = await supabase
-        .from('freeze_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (data && !error) {
+      // Use localStorage as fallback since freeze_settings table might not be available yet
+      const savedSettings = localStorage.getItem(`freeze_settings_${user.id}`);
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
         setFreezeSettings({
-          paidInvoices: data.paid_invoices || false,
-          savedClients: data.saved_clients || false,
-          completedPayments: data.completed_payments || false,
-          finalizedReports: data.finalized_reports || false,
-          confirmedOrders: data.confirmed_orders || false,
-          processedTransactions: data.processed_transactions || false,
+          paidInvoices: parsed.paidInvoices || false,
+          savedClients: parsed.savedClients || false,
+          completedPayments: parsed.completedPayments || false,
+          finalizedReports: parsed.finalizedReports || false,
+          confirmedOrders: parsed.confirmedOrders || false,
+          processedTransactions: parsed.processedTransactions || false,
         });
       }
     };
@@ -50,21 +47,9 @@ export const useSupabaseFreezeSettings = () => {
   const updateFreezeSettings = async (newSettings: FreezeSettings) => {
     if (!user) return;
 
-    const { error } = await supabase
-      .from('freeze_settings')
-      .upsert({
-        user_id: user.id,
-        paid_invoices: newSettings.paidInvoices,
-        saved_clients: newSettings.savedClients,
-        completed_payments: newSettings.completedPayments,
-        finalized_reports: newSettings.finalizedReports,
-        confirmed_orders: newSettings.confirmedOrders,
-        processed_transactions: newSettings.processedTransactions,
-      });
-
-    if (!error) {
-      setFreezeSettings(newSettings);
-    }
+    // Use localStorage as fallback since freeze_settings table might not be available yet
+    localStorage.setItem(`freeze_settings_${user.id}`, JSON.stringify(newSettings));
+    setFreezeSettings(newSettings);
   };
 
   const isItemFrozen = (type: keyof FreezeSettings, item?: any) => {

@@ -51,21 +51,54 @@ const Auth: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting login for:', loginEmail);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
       });
 
-      if (error) throw error;
+      console.log('Login response:', { data, error });
+
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email Not Verified",
+            description: "Please check your email and click the verification link before logging in.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Invalid Credentials",
+            description: "Please check your email and password and try again.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      if (data.user && !data.user.email_confirmed_at) {
+        toast({
+          title: "Email Not Verified",
+          description: "Please check your email and click the verification link before logging in.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "Success",
         description: "Logged in successfully!",
       });
+
+      // Navigation will be handled by the auth state change listener
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: "Login Failed",
-        description: error.message,
+        description: error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -97,11 +130,13 @@ const Auth: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log('Attempting signup for:', signupEmail);
+      
+      const { data, error } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}${window.location.pathname}`,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -109,18 +144,45 @@ const Auth: React.FC = () => {
         }
       });
 
+      console.log('Signup response:', { data, error });
+
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Account created successfully! Please check your email to verify your account.",
-      });
+      if (data.user && !data.user.email_confirmed_at) {
+        toast({
+          title: "Account Created",
+          description: "Please check your email and click the verification link to complete your registration before logging in.",
+        });
+      } else {
+        toast({
+          title: "Success", 
+          description: "Account created successfully! You can now log in.",
+        });
+      }
+
+      // Clear signup form
+      setSignupEmail('');
+      setSignupPassword('');
+      setConfirmPassword('');
+      setFirstName('');
+      setLastName('');
+      
     } catch (error: any) {
-      toast({
-        title: "Signup Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Signup error:', error);
+      
+      if (error.message.includes('User already registered')) {
+        toast({
+          title: "Account Exists",
+          description: "An account with this email already exists. Please try logging in instead.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Signup Failed",
+          description: error.message || "An unexpected error occurred. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
