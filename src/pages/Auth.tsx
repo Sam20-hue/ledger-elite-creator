@@ -136,7 +136,9 @@ const Auth: React.FC = () => {
         email: signupEmail,
         password: signupPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}${window.location.pathname}`,
+          emailRedirectTo: window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/' 
+            : `${window.location.origin}/`,
           data: {
             first_name: firstName,
             last_name: lastName,
