@@ -16,6 +16,8 @@ import Clients from '@/pages/Clients';
 import BankAccounts from '@/pages/BankAccounts';
 import Reports from '@/pages/Reports';
 import Admin from '@/pages/Admin';
+import HR from '@/pages/HR';
+import Roles from '@/pages/Roles';
 import Inventory from '@/pages/Inventory';
 import Integrations from '@/pages/Integrations';
 import Settings from '@/pages/Settings';
@@ -42,8 +44,10 @@ function App() {
                   <Route path="/clients" element={<Clients />} />
                   <Route path="/bank-accounts" element={<BankAccounts />} />
                   <Route path="/reports" element={<Reports />} />
-                  <Route path="/hr" element={<EmployeePortal />} />
+                  <Route path="/hr" element={<HR />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/roles" element={<Roles />} />
+                  <Route path="/employee-portal" element={<EmployeePortal />} />
                   <Route path="/inventory" element={<Inventory />} />
                   <Route path="/integrations" element={<Integrations />} />
                   <Route path="/settings" element={<Settings />} />

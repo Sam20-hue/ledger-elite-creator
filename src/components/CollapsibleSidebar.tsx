@@ -10,7 +10,8 @@ import {
   BarChart3,
   PiggyBank,
   Shield,
-  Briefcase
+  Briefcase,
+  User
 } from 'lucide-react';
 import {
   Sidebar,
@@ -32,10 +33,12 @@ const mainItems = [
 ];
 
 const managementItems = [
-  { title: "HR Management", url: "/hr", icon: UserCheck, newTab: true },
+  { title: "HR Management", url: "/hr", icon: UserCheck },
   { title: "User Management", url: "/admin", icon: Briefcase },
+  { title: "Role Management", url: "/roles", icon: Shield },
+  { title: "Employee Portal", url: "/employee-portal", icon: User },
   { title: "Inventory", url: "/inventory", icon: PiggyBank },
-  { title: "Integrations", url: "/integrations", icon: Shield },
+  { title: "Integrations", url: "/integrations", icon: Settings },
 ];
 
 const settingsItems = [
@@ -51,10 +54,7 @@ export function CollapsibleSidebar() {
     isActive ? "bg-accent text-accent-foreground font-medium" : "hover:bg-accent/50";
 
   const handleNavigation = (item: any, e: React.MouseEvent) => {
-    if (item.newTab) {
-      e.preventDefault();
-      window.open(item.url, '_blank');
-    }
+    // All items now navigate normally - no new tab functionality needed
   };
 
   return (
@@ -95,7 +95,6 @@ export function CollapsibleSidebar() {
                       end 
                       className={getNavCls}
                       onClick={(e) => handleNavigation(item, e)}
-                      target={item.newTab ? "_blank" : undefined}
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
