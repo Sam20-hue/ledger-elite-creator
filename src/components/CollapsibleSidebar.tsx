@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
   FileText, 
@@ -11,7 +11,8 @@ import {
   PiggyBank,
   Shield,
   Briefcase,
-  User
+  User,
+  ArrowLeft
 } from 'lucide-react';
 import {
   Sidebar,
@@ -47,6 +48,7 @@ const settingsItems = [
 
 export function CollapsibleSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => currentPath === path;
@@ -57,9 +59,26 @@ export function CollapsibleSidebar() {
     // All items now navigate normally - no new tab functionality needed
   };
 
+  const showBackButton = ['/hr', '/admin', '/roles'].includes(currentPath);
+
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
+        {/* Back Button for specific pages */}
+        {showBackButton && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => navigate('/')}>
+                    <ArrowLeft className="h-4 w-4" />
+                    <span>Back to Dashboard</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         <SidebarGroup>
           <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
