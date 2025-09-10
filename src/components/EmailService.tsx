@@ -20,7 +20,7 @@ const EmailService = () => {
     templateId: '',
     publicKey: '',
     fromEmail: 'samsonakula3@gmail.com',
-    fromName: 'Ledger Elite Creator',
+    fromName: 'Numera',
     autoReminders: false,
     reminderInterval: 7
   });

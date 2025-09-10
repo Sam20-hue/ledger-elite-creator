@@ -44,7 +44,7 @@ const Layout: React.FC = () => {
                 <header className="h-16 border-b bg-card flex items-center justify-between px-4">
                   <div className="flex items-center gap-4">
                     <SidebarTrigger />
-                    <h1 className="text-xl font-bold">Ledger Elite Creator</h1>
+                    <h1 className="text-xl font-bold">Numera</h1>
                   </div>
                   
                   <div className="flex items-center gap-4">

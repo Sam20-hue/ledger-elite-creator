@@ -126,7 +126,7 @@ const PaymentInitiation = () => {
         Please process your payment using the above details.
         
         Best regards,
-        Ledger Elite Creator Team
+        Numera Team
         samsonakula3@gmail.com
       `;
       

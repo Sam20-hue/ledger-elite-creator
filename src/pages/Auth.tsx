@@ -194,7 +194,7 @@ const Auth: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Ledger Elite Creator</CardTitle>
+          <CardTitle className="text-2xl font-bold">Numera</CardTitle>
           <CardDescription>
             Access your business management platform
             <br />
