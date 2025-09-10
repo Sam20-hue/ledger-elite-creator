@@ -16,34 +16,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
     let mounted = true;
 
-    // Set up auth state listener FIRST
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state change:', event, session?.user?.email);
         if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
+          // Handle different auth events
+          if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
+          } else if (event === 'SIGNED_IN') {
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
+          } else if (event === 'INITIAL_SESSION') {
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
+          }
         }
       }
     );
 
-    // THEN get initial session
+    // Get initial session with proper error handling
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         console.log('Initial session:', session?.user?.email, error);
+        
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error getting session:', error);
+        
+        // Handle refresh token errors gracefully
+        if (error?.code === 'refresh_token_not_found' || error?.message?.includes('refresh_token_not_found')) {
+          console.log('Refresh token not found, clearing session');
+          await supabase.auth.signOut();
+        }
+        
         if (mounted) {
+          setSession(null);
+          setUser(null);
           setLoading(false);
         }
       }

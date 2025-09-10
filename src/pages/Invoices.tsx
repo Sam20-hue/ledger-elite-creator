@@ -2,37 +2,12 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, FileText, Eye, Edit, Trash2 } from 'lucide-react';
+import { useInvoice } from '@/contexts/InvoiceContext';
+import { useNavigate } from 'react-router-dom';
 
 const Invoices = () => {
-  const invoices = [
-    {
-      id: 1,
-      number: '#INV-001',
-      client: 'ABC Company',
-      amount: 2500,
-      date: '2025-01-15',
-      status: 'Paid',
-      dueDate: '2025-01-30'
-    },
-    {
-      id: 2,
-      number: '#INV-002',
-      client: 'XYZ Corp',
-      amount: 1800,
-      date: '2025-01-10',
-      status: 'Pending',
-      dueDate: '2025-01-25'
-    },
-    {
-      id: 3,
-      number: '#INV-003',
-      client: 'Tech Solutions',
-      amount: 3200,
-      date: '2025-01-08',
-      status: 'Overdue',
-      dueDate: '2025-01-20'
-    }
-  ];
+  const { invoices } = useInvoice();
+  const navigate = useNavigate();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -50,7 +25,7 @@ const Invoices = () => {
           <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
           <p className="text-muted-foreground">Manage your invoices and billing</p>
         </div>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={() => navigate('/invoice-form')}>
           <Plus className="h-4 w-4" />
           Create Invoice
         </Button>
@@ -81,33 +56,41 @@ const Invoices = () => {
                 </tr>
               </thead>
               <tbody>
-                {invoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-b hover:bg-muted/50">
-                    <td className="p-4 font-medium">{invoice.number}</td>
-                    <td className="p-4">{invoice.client}</td>
-                    <td className="p-4">${invoice.amount.toLocaleString()}</td>
-                    <td className="p-4">{invoice.date}</td>
-                    <td className="p-4">{invoice.dueDate}</td>
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {invoices.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                      No invoices found. <Button variant="link" onClick={() => navigate('/invoice-form')} className="p-0 h-auto">Create your first invoice</Button>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  invoices.map((invoice) => (
+                    <tr key={invoice.id} className="border-b hover:bg-muted/50">
+                      <td className="p-4 font-medium">{invoice.invoiceNumber}</td>
+                      <td className="p-4">{invoice.client.name}</td>
+                      <td className="p-4">${invoice.total.toLocaleString()}</td>
+                      <td className="p-4">{new Date(invoice.issueDate).toLocaleDateString()}</td>
+                      <td className="p-4">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status || 'draft')}`}>
+                          {invoice.status || 'draft'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => navigate(`/invoice-preview/${invoice.id}`)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => navigate('/invoice-form', { state: { editInvoice: invoice } })}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
