@@ -62,16 +62,34 @@ const Auth: React.FC = () => {
 
       if (error) {
         if (error.message.includes('Email not confirmed')) {
-          toast({
-            title: "Email Not Verified",
-            description: "Please check your email and click the verification link before logging in.",
-            variant: "destructive",
+          // Attempt to resend verification email automatically
+          const redirectTo = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000/'
+            : `${window.location.origin}/`;
+          const { error: resendError } = await supabase.auth.resend({
+            type: 'signup',
+            email: loginEmail,
+            options: { emailRedirectTo: redirectTo }
           });
+
+          if (resendError) {
+            console.error('Resend verification failed:', resendError);
+            toast({
+              title: 'Email Not Verified',
+              description: 'We tried to resend the verification email but encountered an issue. Please try again or contact support.',
+              variant: 'destructive',
+            });
+          } else {
+            toast({
+              title: 'Verify Your Email',
+              description: 'We just sent you a new verification link. Please check your inbox (and spam).',
+            });
+          }
         } else if (error.message.includes('Invalid login credentials')) {
           toast({
-            title: "Login Failed", 
-            description: "Please verify your email first by clicking the link we sent you, then try logging in again.",
-            variant: "destructive",
+            title: 'Login Failed', 
+            description: 'Invalid email or password. If you just signed up, verify your email first.',
+            variant: 'destructive',
           });
         } else {
           throw error;
@@ -190,6 +208,42 @@ const Auth: React.FC = () => {
     }
   };
 
+  const resendVerification = async () => {
+    if (!loginEmail) {
+      toast({
+        title: 'Enter your email',
+        description: 'Please enter your email above, then click resend.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const redirectTo = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/'
+      : `${window.location.origin}/`;
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: loginEmail,
+        options: { emailRedirectTo: redirectTo },
+      });
+      if (error) throw error;
+      toast({
+        title: 'Verification Sent',
+        description: 'A new verification email has been sent. Check your inbox and spam folder.',
+      });
+    } catch (err: any) {
+      console.error('Resend verification error:', err);
+      toast({
+        title: 'Could not resend',
+        description: err.message || 'Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
       <Card className="w-full max-w-md mx-4">
@@ -261,6 +315,18 @@ const Auth: React.FC = () => {
                     </>
                   )}
                 </Button>
+                <div className="mt-2 text-xs text-muted-foreground text-center">
+                  Didn’t receive the email?
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    onClick={resendVerification}
+                    className="px-1"
+                  >
+                    Resend verification
+                  </Button>
+                </div>
               </form>
             </TabsContent>
             
