@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_payment_accounts: {
+        Row: {
+          account_details: Json
+          account_name: string
+          account_type: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          is_active: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          account_details: Json
+          account_name: string
+          account_type: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          account_details?: Json
+          account_name?: string
+          account_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bank_accounts: {
         Row: {
           account_name: string
@@ -166,6 +202,42 @@ export type Database = {
         }
         Relationships: []
       }
+      market_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          symbol: string
+          target_value: number | null
+          triggered_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          symbol: string
+          target_value?: number | null
+          triggered_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          symbol?: string
+          target_value?: number | null
+          triggered_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       online_users: {
         Row: {
           id: string
@@ -187,63 +259,399 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolios: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          performance_percentage: number | null
+          total_invested: number | null
+          total_profit_loss: number | null
+          total_value: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          performance_percentage?: number | null
+          total_invested?: number | null
+          total_profit_loss?: number | null
+          total_value?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          performance_percentage?: number | null
+          total_invested?: number | null
+          total_profit_loss?: number | null
+          total_value?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      positions: {
+        Row: {
+          avg_price: number
+          created_at: string | null
+          current_price: number
+          id: string
+          name: string
+          portfolio_id: string
+          profit_loss: number | null
+          profit_loss_percentage: number | null
+          sector: string | null
+          shares: number
+          symbol: string
+          total_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          avg_price: number
+          created_at?: string | null
+          current_price: number
+          id?: string
+          name: string
+          portfolio_id: string
+          profit_loss?: number | null
+          profit_loss_percentage?: number | null
+          sector?: string | null
+          shares: number
+          symbol: string
+          total_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          avg_price?: number
+          created_at?: string | null
+          current_price?: number
+          id?: string
+          name?: string
+          portfolio_id?: string
+          profit_loss?: number | null
+          profit_loss_percentage?: number | null
+          sector?: string | null
+          shares?: number
+          symbol?: string
+          total_value?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          country: string | null
           created_at: string | null
           email: string
           first_name: string | null
           id: string
+          is_verified: boolean | null
           last_name: string | null
+          phone: string | null
+          profile_completed: boolean | null
           role: string | null
           updated_at: string | null
         }
         Insert: {
+          country?: string | null
           created_at?: string | null
           email: string
           first_name?: string | null
           id: string
+          is_verified?: boolean | null
           last_name?: string | null
+          phone?: string | null
+          profile_completed?: boolean | null
           role?: string | null
           updated_at?: string | null
         }
         Update: {
+          country?: string | null
           created_at?: string | null
           email?: string
           first_name?: string | null
           id?: string
+          is_verified?: boolean | null
           last_name?: string | null
+          phone?: string | null
+          profile_completed?: boolean | null
           role?: string | null
           updated_at?: string | null
         }
         Relationships: []
       }
-      todos: {
+      transaction_approvals: {
+        Row: {
+          approval_token: string
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          is_used: boolean
+          transaction_id: string
+        }
+        Insert: {
+          approval_token: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_used?: boolean
+          transaction_id: string
+        }
+        Update: {
+          approval_token?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_approvals_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_approvals_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_status: string | null
+          old_status: string | null
+          transaction_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          old_status?: string | null
+          transaction_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          old_status?: string | null
+          transaction_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          admin_approved: boolean | null
+          amount: number
+          created_at: string | null
+          currency: string
+          description: string | null
+          id: string
+          status: string | null
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_approved?: boolean | null
+          amount: number
+          created_at?: string | null
+          currency: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_approved?: boolean | null
+          amount?: number
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_accounts: {
+        Row: {
+          balance_btc: number | null
+          balance_eur: number | null
+          balance_ksh: number | null
+          balance_usd: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          total_earned: number | null
+          total_invested: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance_btc?: number | null
+          balance_eur?: number | null
+          balance_ksh?: number | null
+          balance_usd?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          total_earned?: number | null
+          total_invested?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance_btc?: number | null
+          balance_eur?: number | null
+          balance_ksh?: number | null
+          balance_usd?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          total_earned?: number | null
+          total_invested?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_trading_experience: {
         Row: {
           created_at: string
-          id: number
-          is_done: boolean | null
-          task: string | null
+          experience_level: string | null
+          first_trade_date: string | null
+          id: string
+          losing_trades: number | null
+          total_trades: number | null
+          updated_at: string
+          user_id: string
+          winning_trades: number | null
         }
         Insert: {
           created_at?: string
-          id?: number
-          is_done?: boolean | null
-          task?: string | null
+          experience_level?: string | null
+          first_trade_date?: string | null
+          id?: string
+          losing_trades?: number | null
+          total_trades?: number | null
+          updated_at?: string
+          user_id: string
+          winning_trades?: number | null
         }
         Update: {
           created_at?: string
-          id?: number
-          is_done?: boolean | null
-          task?: string | null
+          experience_level?: string | null
+          first_trade_date?: string | null
+          id?: string
+          losing_trades?: number | null
+          total_trades?: number | null
+          updated_at?: string
+          user_id?: string
+          winning_trades?: number | null
+        }
+        Relationships: []
+      }
+      watchlist: {
+        Row: {
+          created_at: string | null
+          current_price: number
+          id: string
+          name: string
+          price_change: number | null
+          price_change_percentage: number | null
+          symbol: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_price: number
+          id?: string
+          name: string
+          price_change?: number | null
+          price_change_percentage?: number | null
+          symbol: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_price?: number
+          id?: string
+          name?: string
+          price_change?: number | null
+          price_change_percentage?: number | null
+          symbol?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      public_online_users: {
+        Row: {
+          id: string | null
+          last_seen: string | null
+          page_route: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string | null
+          last_seen?: string | null
+          page_route?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string | null
+          last_seen?: string | null
+          page_route?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      can_view_online_users: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
