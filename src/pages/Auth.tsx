@@ -152,6 +152,40 @@ const Auth: React.FC = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!loginEmail) {
+      toast({
+        title: 'Enter your email',
+        description: 'Please enter your email above to reset your password.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const redirectTo = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/'
+      : `${window.location.origin}/`;
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(loginEmail, {
+        redirectTo,
+      });
+      if (error) throw error;
+      toast({
+        title: 'Password Reset Email Sent',
+        description: 'Check your email for a link to reset your password.',
+      });
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      toast({
+        title: 'Could not send reset email',
+        description: err.message || 'Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
       <Card className="w-full max-w-md mx-4">
@@ -212,17 +246,32 @@ const Auth: React.FC = () => {
                 </>
               )}
             </Button>
-            <div className="mt-2 text-xs text-muted-foreground text-center">
-              Didn't receive the email?
-              <Button
-                type="button"
-                variant="link"
-                size="sm"
-                onClick={resendVerification}
-                className="px-1"
-              >
-                Resend verification
-              </Button>
+            
+            <div className="flex flex-col gap-2 mt-2">
+              <div className="text-xs text-muted-foreground text-center">
+                Forgot your password?
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  onClick={handleForgotPassword}
+                  className="px-1"
+                >
+                  Reset password
+                </Button>
+              </div>
+              <div className="text-xs text-muted-foreground text-center">
+                Didn't receive the email?
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  onClick={resendVerification}
+                  className="px-1"
+                >
+                  Resend verification
+                </Button>
+              </div>
             </div>
           </form>
         </CardContent>
