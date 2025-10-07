@@ -49,10 +49,10 @@ const Inventory = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'In Stock': return 'bg-green-100 text-green-800';
-      case 'Low Stock': return 'bg-yellow-100 text-yellow-800';
-      case 'Out of Stock': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'In Stock': return 'bg-success/10 text-success';
+      case 'Low Stock': return 'bg-warning/10 text-warning';
+      case 'Out of Stock': return 'bg-danger/10 text-danger';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -124,7 +124,7 @@ const Inventory = () => {
                     <td className="p-4 font-mono text-sm">{item.sku}</td>
                     <td className="p-4">{item.category}</td>
                     <td className="p-4">
-                      <span className={item.stock <= item.minStock ? 'text-red-600 font-medium' : ''}>
+                      <span className={item.stock <= item.minStock ? 'text-danger font-medium' : ''}>
                         {item.stock}
                       </span>
                     </td>

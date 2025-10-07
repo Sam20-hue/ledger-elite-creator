@@ -75,7 +75,7 @@ const Integrations = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Integrations</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -90,7 +90,7 @@ const Integrations = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Payment Gateways</CardTitle>
-            <Zap className="h-4 w-4 text-blue-600" />
+            <Zap className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -105,7 +105,7 @@ const Integrations = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">API Requests</CardTitle>
-            <Shield className="h-4 w-4 text-purple-600" />
+            <Shield className="h-4 w-4 text-accent-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,234</div>
@@ -142,9 +142,9 @@ const Integrations = () => {
                 </div>
                 <div className="flex items-center gap-1">
                   {integration.connected ? (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-success" />
                   ) : (
-                    <Circle className="h-5 w-5 text-gray-400" />
+                    <Circle className="h-5 w-5 text-muted-foreground" />
                   )}
                 </div>
               </div>
@@ -157,8 +157,8 @@ const Integrations = () => {
               <div className="flex items-center justify-between">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   integration.status === 'Active' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-success/10 text-success' 
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   {integration.status}
                 </span>

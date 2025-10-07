@@ -60,8 +60,8 @@ const BankAccounts = () => {
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   account.status === 'Active' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-success/10 text-success' 
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   {account.status}
                 </span>
@@ -117,13 +117,13 @@ const BankAccounts = () => {
               <p className="text-sm text-muted-foreground">Active Accounts</p>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <h3 className="text-2xl font-bold text-green-600">
+              <h3 className="text-2xl font-bold text-success">
                 ${accounts.reduce((sum, account) => sum + account.balance, 0).toLocaleString()}
               </h3>
               <p className="text-sm text-muted-foreground">Total Balance</p>
             </div>
             <div className="text-center p-4 border rounded-lg">
-              <h3 className="text-2xl font-bold text-orange-600">
+              <h3 className="text-2xl font-bold text-warning">
                 ${accounts.filter(a => a.status === 'Active').reduce((sum, account) => sum + account.balance, 0).toLocaleString()}
               </h3>
               <p className="text-sm text-muted-foreground">Active Balance</p>

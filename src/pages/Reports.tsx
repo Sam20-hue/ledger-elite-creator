@@ -63,9 +63,9 @@ const Reports = () => {
               <CardDescription className="text-sm">{stat.label}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
+            <div className="text-2xl font-bold">{stat.value}</div>
               <div className={`text-xs flex items-center mt-1 ${
-                stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                stat.trend === 'up' ? 'text-success' : 'text-danger'
               }`}>
                 <TrendingUp className={`h-3 w-3 mr-1 ${stat.trend === 'down' ? 'rotate-180' : ''}`} />
                 {stat.change} from last month
